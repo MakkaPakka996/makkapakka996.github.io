@@ -58,6 +58,11 @@
   gap: 14px;
 }
 
+.friends-page .friends-card-zone .grid-box .grid-cell.site-card {
+  aspect-ratio: auto;
+  height: auto;
+}
+
 .friends-page .friends-card-zone .site-card {
   border-radius: 16px;
   overflow: hidden;
